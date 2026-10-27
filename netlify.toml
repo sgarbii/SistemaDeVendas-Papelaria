@@ -9,6 +9,13 @@
   publish = "publicar"
   command = "node scripts/preparar-deploy.mjs"
 
+# O build só precisa do Node (o site não tem bundler). As devDependencies
+# (Vitest, esbuild, supabase-js para gerar o vendor) servem só para
+# desenvolvimento, então o Netlify não as instala.
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--omit=dev --ignore-scripts"
+
 # RNF10: o Netlify já redireciona http:// para https:// em todo site
 # (Domain management > HTTPS > "Force HTTPS", ligado por padrão).
 
