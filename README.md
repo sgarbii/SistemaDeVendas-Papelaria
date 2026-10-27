@@ -70,7 +70,10 @@ Em supabase.com → **New project**. Escolha um nome, uma senha do banco e a reg
 ### 2. Rodar as migrations em ordem
 No painel: **SQL Editor** → **New query**. Abra cada arquivo de `supabase/migrations/`, cole o conteúdo e clique em **Run**, **nesta ordem**:
 
-`01_tabelas` → `02_perfis_e_admin` → `03_carrinho` → `04_pedidos` → `05_avaliacoes` → `06_rls` → `07_storage` → `08_pg_cron` → `09_seed`
+`01_tabelas` → `02_perfis_e_admin` → `03_carrinho` → `04_pedidos` → `05_avaliacoes` → `06_rls` → `07_storage` → `08_pg_cron` → `09_seed` → `10_ajustes_security_advisor`
+
+A `10` aplica as correções do Security Advisor do Supabase (veja [docs/SEGURANCA.md](docs/SEGURANCA.md)).
+Migrations já aplicadas não são editadas: cada mudança no banco entra num arquivo novo, com o próximo número.
 
 ### 3. Ativar o pg_cron
 Antes do arquivo `08_pg_cron.sql`: **Database → Extensions** → procure `pg_cron` → **Enable**.

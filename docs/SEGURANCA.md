@@ -39,6 +39,17 @@ Basta apertar F12. Por isso:
 - **Cabeçalhos HTTP** (`netlify.toml`): CSP, HSTS (só HTTPS), `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` e `Permissions-Policy` (câmera, microfone e localização desligados). O Netlify redireciona HTTP para HTTPS.
 - **Deploy**: só os arquivos do site são publicados (`scripts/preparar-deploy.mjs`); migrations, testes e scripts não vão para o ar.
 
+## Security Advisor do Supabase
+
+O painel do Supabase tem um verificador automático de segurança, o **Security Advisor**. Resultado e o que foi feito:
+
+| Aviso | O que significa | Decisão |
+|---|---|---|
+| **Public Bucket Allows Listing** (`storage.produtos`) | A política de leitura em `storage.objects` deixava qualquer pessoa listar todos os arquivos do bucket. | **Corrigido** na migration `10`: a política foi removida. Como o bucket é público, cada imagem continua abrindo pela URL pública, mas ninguém mais consegue listar os arquivos. |
+| **Signed-In Users Can Execute SECURITY DEFINER Function**: `eh_admin()` | A função de checagem de admin podia ser chamada pela API. | **Corrigido** na migration `10`: ela foi para o schema `interno`, que a API não publica. As políticas RLS continuam usando a função normalmente. |
+| **Signed-In Users Can Execute SECURITY DEFINER Function**: `adicionar_ao_carrinho`, `alterar_quantidade_carrinho`, `remover_do_carrinho`, `finalizar_pedido`, `excluir_minha_conta` | Funções que rodam com permissão de dono podem ser chamadas por usuários logados. | **Aceito, de propósito.** Essas funções são a *única* porta para gravar no carrinho e nos pedidos: o cliente não tem permissão de escrita nessas tabelas, então não consegue forjar preço, total, status ou reserva. Cada função confere quem está logado (`auth.uid()`), valida as entradas (ids e quantidade de 1 a 99), usa `search_path = ''` e não recebe preço nem total. Visitantes sem login não podem chamá-las. Trocar para `SECURITY INVOKER` exigiria dar ao cliente permissão de escrita direta nas tabelas, o que seria **menos** seguro. |
+| **Leaked Password Protection Disabled** (Auth) | O Supabase pode recusar senhas que já vazaram na internet (base do *Have I Been Pwned*). | É uma opção do painel (**Authentication → Sign In / Providers → Email**: *Prevent use of leaked passwords*), disponível só nos planos pagos. No plano gratuito do MVP o aviso fica. As outras defesas continuam ativas: senha mínima de 8 caracteres, hash bcrypt, confirmação de e-mail e limite de tentativas. |
+
 ## LGPD (RE01)
 
 - **Coleta mínima**: nome, e-mail, telefone e endereço, só para as vendas.
