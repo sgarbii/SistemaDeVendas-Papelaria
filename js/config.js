@@ -16,5 +16,5 @@
 // essas ficam fora do repositório.
 // =============================================================
 
-export const SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
-export const SUPABASE_CHAVE_PUBLICA = 'COLE-AQUI-A-CHAVE-ANON-PUBLICA';
+export const SUPABASE_URL = 'https://eyadyrrgavrnlrhbisdr.supabase.co';
+export const SUPABASE_CHAVE_PUBLICA = 'sb_publishable_JeiCOI_R2TB6K62vDVUe0A_k3G_alNT';
