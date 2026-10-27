@@ -1,0 +1,170 @@
+/* =============================================================
+   admin.css — painel do administrador (RF07).
+   Usa as mesmas variáveis de tema.css e os componentes de estilos.css.
+   ============================================================= */
+
+.admin-topo {
+  background: var(--cor-texto);
+  color: var(--cor-fundo);
+  border-bottom: 4px solid var(--cor-marca-texto);
+}
+.admin-topo .container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.admin-topo .logo { color: var(--cor-fundo); font-size: 1.5rem; }
+.admin-topo .logo .grifo {
+  background: var(--cor-marca-texto);
+  color: var(--cor-texto);
+  padding: 0 .2em;
+  border-radius: 4px;
+}
+.admin-topo .etiqueta {
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--cor-marca-texto);
+}
+.admin-topo a.link-claro,
+.admin-topo button.link-claro {
+  color: var(--cor-fundo);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  min-height: 44px;
+  padding: 0 .4rem;
+}
+.admin-topo .acoes-topo { display: flex; align-items: center; gap: 8px; }
+
+.admin-nav {
+  background: var(--cor-superficie);
+  border-bottom: 2px solid var(--cor-texto);
+}
+.admin-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+}
+.admin-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 44px;
+  padding: 0 .9rem;
+  border-radius: 10px;
+  color: var(--cor-texto);
+  font-weight: 700;
+  text-decoration: none;
+}
+.admin-nav a:hover { background: var(--cor-superficie-2); }
+.admin-nav a[aria-current="page"] { background: var(--cor-marca-texto); box-shadow: inset 0 0 0 2px var(--cor-texto); }
+
+.barra-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.barra-titulo h1 { margin: 0; }
+
+/* cartões do resumo do dia */
+.cartoes-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.cartao-resumo {
+  padding: 18px 20px;
+  background: var(--cor-superficie);
+  border: 2px solid var(--cor-texto);
+  border-radius: 16px;
+  box-shadow: 5px 5px 0 var(--cor-texto);
+}
+.cartao-resumo .rotulo { font-weight: 700; color: var(--cor-texto-suave); }
+.cartao-resumo .valor { display: block; font-family: var(--fonte-titulo); font-size: 2.4rem; line-height: 1.1; margin-top: 6px; }
+.cartao-resumo.destaque { background: var(--cor-marca-texto); }
+.cartao-resumo.destaque .rotulo { color: var(--cor-texto); }
+
+/* tabela que vira cartões no celular (sem rolagem horizontal) */
+.tabela {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--cor-superficie);
+  border: 2px solid var(--cor-texto);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.tabela th,
+.tabela td { padding: .7rem .8rem; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--cor-borda); }
+.tabela th { background: var(--cor-superficie-2); font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; }
+.tabela tr:last-child td { border-bottom: 0; }
+.tabela img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 2px solid var(--cor-texto); }
+.tabela .numero { text-align: right; font-variant-numeric: tabular-nums; }
+.tabela .acoes { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+.tabela tr.inativo td { color: var(--cor-texto-suave); background: var(--cor-fundo); }
+.tabela select { min-height: 40px; border: 2px solid var(--cor-texto); border-radius: 8px; font: inherit; padding: 0 .4rem; background: var(--cor-superficie); color: var(--cor-texto); }
+.tabela td.comentario { max-width: 40ch; white-space: pre-line; overflow-wrap: anywhere; }
+
+@media (max-width: 760px) {
+  .tabela thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .tabela,
+  .tabela tbody,
+  .tabela tr,
+  .tabela td { display: block; width: 100%; }
+  .tabela tr { border-bottom: 2px solid var(--cor-texto); padding: 6px 0; }
+  .tabela tr:last-child { border-bottom: 0; }
+  .tabela td { border: 0; padding: .35rem .9rem; text-align: left; }
+  .tabela td[data-rotulo]::before {
+    content: attr(data-rotulo) ": ";
+    font-weight: 700;
+    color: var(--cor-texto-suave);
+  }
+  .tabela .numero { text-align: left; }
+  .tabela .acoes { justify-content: flex-start; }
+  .tabela td.comentario { max-width: none; }
+}
+
+.selo-ativo { font-size: .8rem; font-weight: 700; }
+.selo-ativo.sim { color: var(--cor-sucesso); }
+.selo-ativo.nao { color: var(--cor-erro); }
+
+.previa-imagem {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border: 2px solid var(--cor-texto);
+  border-radius: 12px;
+  background: var(--cor-superficie-2);
+}
+.linha-imagem { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+
+.lista-estoque { list-style: none; margin: 0; padding: 0; }
+.lista-estoque li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: .6rem 0;
+  border-bottom: 1px dashed var(--cor-borda);
+}
+.lista-estoque li:last-child { border-bottom: 0; }
+.lista-estoque .qtd { font-weight: 700; color: var(--cor-erro); white-space: nowrap; }
+
+.form-inline { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 20px; }
+.form-inline .campo { flex: 1 1 220px; }

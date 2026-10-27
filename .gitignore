@@ -1,0 +1,25 @@
+# Dependências e saídas geradas
+node_modules/
+publicar/
+coverage/
+.netlify/
+
+# Segredos e variáveis de ambiente (nunca no Git)
+.env
+.env.*
+
+# Dumps, backups e exports de dados
+*.sql.bak
+*.dump
+*.backup
+*.csv
+
+# Sistema operacional e editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log

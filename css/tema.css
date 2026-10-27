@@ -1,0 +1,43 @@
+/* =============================================================
+   tema.css — ÚNICO lugar com as cores e fontes da loja (RNF04).
+   A paleta ainda será escolhida com o cliente: para trocar as cores
+   do site inteiro, basta mudar os valores abaixo.
+   Todos os pares texto/fundo usados têm contraste >= 4,5:1 (RNF12).
+   ============================================================= */
+:root {
+  /* papel e superfícies */
+  --cor-fundo: #faf6ec;            /* papel creme */
+  --cor-fundo-pontos: #e2d9c6;     /* pontilhado do fundo (decorativo) */
+  --cor-superficie: #ffffff;
+  --cor-superficie-2: #f3ecdd;
+  --cor-borda: #d6cbb5;
+
+  /* texto ("tinta") */
+  --cor-texto: #1c2541;
+  --cor-texto-suave: #4f5a6e;
+
+  /* ações */
+  --cor-primaria: #1e4fbf;         /* azul caneta */
+  --cor-primaria-escura: #163b8f;
+  --cor-sobre-primaria: #ffffff;
+  --cor-compra: #c23a0c;           /* laranja carimbo: botão de compra em destaque */
+  --cor-compra-escura: #96300c;
+  --cor-sobre-compra: #ffffff;
+  --cor-marca-texto: #ffe066;      /* grifo amarelo atrás de texto escuro */
+  --cor-estrela: #d99a00;          /* decorativa: a nota também aparece em texto */
+  --cor-estrela-vazia: #d6cbb5;
+
+  /* mensagens */
+  --cor-sucesso: #1d6b43;
+  --cor-sucesso-fundo: #e2f3e8;
+  --cor-alerta: #6e4a00;
+  --cor-alerta-fundo: #fff2c2;
+  --cor-erro: #b3261e;
+  --cor-erro-fundo: #fdeceb;
+
+  --cor-foco: #1e4fbf;
+
+  /* fontes */
+  --fonte-titulo: "Young Serif", Georgia, "Times New Roman", serif;
+  --fonte-texto: "Atkinson Hyperlegible", "Segoe UI", Tahoma, sans-serif;
+}

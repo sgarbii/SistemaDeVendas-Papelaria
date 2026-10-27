@@ -1,0 +1,21 @@
+{
+  "name": "papelaria-online",
+  "version": "1.0.0",
+  "description": "MVP do Sistema de Vendas de Papelaria Online (ECOT11A - UNIFEI). O site não usa bundler: este package.json serve para os testes, o verificador de segredos e a cópia local das bibliotecas.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verificar": "node scripts/verificar-segredos.mjs",
+    "vendor": "node scripts/gerar-vendor.mjs",
+    "prepare": "node scripts/instalar-hook.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/atkinson-hyperlegible": "5.3.0",
+    "@fontsource/young-serif": "5.3.0",
+    "@supabase/supabase-js": "2.112.4",
+    "esbuild": "0.28.2",
+    "vitest": "5.0.5"
+  }
+}
