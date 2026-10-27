@@ -130,7 +130,10 @@ Os módulos ES não funcionam abrindo o arquivo direto (`file://`). Na pasta `co
 npx serve -l 3000
 ```
 
-Abra **http://localhost:3000**. O arquivo `serve.json` mantém os endereços com `.html`.
+Abra **http://localhost:3000**. O arquivo `serve.json` mantém os endereços com `.html`, abre a loja em `/` e desliga a listagem de pastas.
+
+Se a porta 3000 estiver ocupada, use outra (por exemplo `npx serve -l 5500`) e troque também a **Site URL** e as
+**Redirect URLs** do Supabase (passo 4) para essa porta. Senão, o link de confirmação do e-mail não volta para a loja.
 Outra opção é a extensão **Live Server** do VS Code, com a pasta `commit` aberta como raiz.
 
 ## Antes de cada commit
