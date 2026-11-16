@@ -10,7 +10,8 @@ simulado e avalia o que comprou. O administrador gerencia produtos, categorias, 
 - **Documento de requisitos:** [docs/Documento_de_Requisitos.pdf](docs/Documento_de_Requisitos.pdf)
 - **Segurança (ameaças e proteções):** [docs/SEGURANCA.md](docs/SEGURANCA.md)
 - **Casos de teste e testes de segurança:** [tests/CASOS_DE_TESTE.md](tests/CASOS_DE_TESTE.md)
-- **Site publicado:** _(cole aqui o link do Netlify)_
+- **Site publicado:** [https://sistema-papelaria.netlify.app](https://sistema-papelaria.netlify.app)
+- **Conta de administrador para avaliação:** o e-mail e a senha vão no texto da entrega do SIGAA (não ficam no repositório).
 
 ## Funcionalidades por nível (seção 9.4)
 
