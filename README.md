@@ -32,6 +32,45 @@ Fora do MVP (seção 11): pagamento real, bloqueio de conta (RN03), variações 
 - Fontes Young Serif e Atkinson Hyperlegible (licença OFL), servidas pelo próprio site
 - Gráficos do dashboard desenhados em SVG pelo próprio código (sem biblioteca externa)
 
+## Processo de desenvolvimento
+
+O sistema foi construído de forma **guiada pela especificação**: primeiro o que o cliente precisa, depois o código.
+Cada etapa produziu um artefato que a seguinte usou como base.
+
+1. **Levantamento com o cliente** (Lab 1): entrevista, problemas reais e prioridades.
+2. **Requisitos** (Lab 2): RU, RF, RNF com métricas que podem ser medidas, regras de negócio, requisito legal (LGPD),
+   matriz de rastreabilidade e cenários com fluxos alternativos e de exceção.
+3. **Modelos UML** (Lab 3): casos de uso, classes, sequência e máquina de estados. As tabelas, funções e
+   regras do banco saíram diretamente desses diagramas.
+4. **Planejamento** (Lab 4): Scrum com sprints de 2 semanas e quadro Kanban.
+5. **Arquitetura e segurança antes do código**: as regras de negócio e de permissão ficam no banco (RLS e
+   funções PL/pgSQL), nunca só no navegador; a tabela ameaça → proteção está em [docs/SEGURANCA.md](docs/SEGURANCA.md).
+6. **Implementação do MVP** nos três níveis do roteiro, sempre conferindo o código contra o documento de requisitos.
+7. **Verificação**: testes de unidade (Vitest), roteiro de casos de teste e de segurança, revisão de qualidade com
+   métricas e auditoria de segurança.
+
+### Ferramentas de IA
+
+O código foi desenvolvido com a ajuda do **Claude Code** (Anthropic), usado como par de programação: as decisões de
+requisitos, arquitetura, regras de negócio e segurança são do autor, e cada mudança foi revisada, testada e conferida
+contra a especificação antes de entrar no repositório. As fotos dos produtos, os banners, as ilustrações e os ícones
+foram gerados com a ajuda do **ChatGPT**, a partir de prompts escritos para manter a paleta e o estilo da loja.
+
+No Claude Code foram usadas *skills* (roteiros especializados) para dar método a cada tipo de tarefa:
+
+| Skill | Uso neste projeto |
+|---|---|
+| `frontend-design` | Direção visual da loja: banner com a foto da mesa de estudos, categorias com foto, estados vazios ilustrados e layout do dashboard |
+| `clean-code-quality` | Refatoração guiada por métricas (complexidade ciclomática, tamanho das funções, dependências), com testes de caracterização antes de cada mudança |
+| `security-audit` | Auditoria de segurança: histórico do Git, dependências, RLS, permissões por coluna e cabeçalhos HTTP. Encontrou e corrigiu a exposição de `cliente_id` nas avaliações (migration `12`) |
+
+Resultado medido da revisão de qualidade: testes de unidade de 55 para 92, funções com complexidade acima de 10
+de 3 para 1, funções com mais de 30 linhas de 12 para 5, e nenhuma dependência circular entre módulos.
+
+**Este projeto virou um método.** A forma de trabalho usada aqui, de entrevista e requisitos até UML, arquitetura,
+segurança, plano de testes e MVP, foi depois organizada pelo autor na skill **`arquiteto-software`**, que conduz
+qualquer projeto de software por essas mesmas etapas.
+
 ## Organização das pastas
 
 ```
