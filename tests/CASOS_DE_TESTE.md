@@ -62,7 +62,7 @@ rollback;
 "Faça login para usar o carrinho". Depois do login, volta para a página do mesmo produto (FA01).
 O banco também recusa a chamada: sem login, a API responde *permission denied for function adicionar_ao_carrinho*.
 
-**Resultado obtido:** ☐ Passou ☐ Falhou. Observações: ______________________
+**Resultado obtido:** ☑ Passou ☐ Falhou. Observações: 16/11/2026, no site publicado: o clique levou a `login.html?voltar=/produto.html?id=1`; abrir `/carrinho.html` sem login também leva ao login.
 
 ---
 
@@ -81,7 +81,7 @@ O banco também recusa a chamada: sem login, a API responde *permission denied f
 
 **Esperado:** o item continua no carrinho, com o tempo de reserva, e o estoque disponível diminuiu 2 unidades.
 
-**Resultado obtido:** ☐ Passou ☐ Falhou. Observações: ______________________
+**Resultado obtido:** ☑ Passou ☐ Falhou. Observações: 16/11/2026, no site publicado: o item continuou no carrinho depois de recarregar a página.
 
 ---
 
@@ -97,7 +97,7 @@ O banco também recusa a chamada: sem login, a API responde *permission denied f
 
 **Esperado:** a mensagem "Produto indisponível." aparece e nada é reservado: o carrinho não muda.
 
-**Resultado obtido:** ☐ Passou ☐ Falhou. Observações: ______________________
+**Resultado obtido:** ☑ Passou ☐ Falhou. Observações: 16/11/2026, no site publicado: a Calculadora científica aparece como "Indisponível", a página mostra "Produto indisponível no momento" e o botão de compra fica desativado.
 
 ---
 
@@ -305,7 +305,7 @@ Também: abra `/admin/produtos.html` logado como cliente comum.
 **Esperado:** erro de permissão, *new row violates row-level security policy for table "produtos"* (código 42501).
 O painel mostra "Acesso restrito".
 
-**Resultado obtido:** ☐ Passou ☐ Falhou. Observações: ______________________
+**Resultado obtido:** ☐ Passou ☐ Falhou. Observações: ainda não executado. Revisão de código (auditoria de segurança de 16/11/2026): a política "produtos: admin cria" (`06_rls.sql`) só aceita inserção de quem passa em `eh_admin()`.
 
 ---
 
@@ -554,7 +554,7 @@ No DevTools (Elements), não existe nenhuma tag `<img src="x">` criada.
 - O console não mostra nenhum erro de CSP ao navegar pela loja.
 - `http://` redireciona para `https://`.
 
-**Resultado obtido:** ☐ Passou ☐ Falhou. Nota no securityheaders.com: ______
+**Resultado obtido:** ☑ Passou ☐ Falhou. Nota no securityheaders.com: **A+** (16/11/2026), com os seis cabeçalhos presentes; `http://` redireciona para `https://` (301).
 
 ---
 
