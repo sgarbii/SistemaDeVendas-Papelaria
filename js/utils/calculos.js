@@ -2,7 +2,7 @@
 // As contas são feitas em centavos para evitar erros de arredondamento
 // (em JavaScript, 0.1 + 0.2 = 0.30000000000000004).
 
-function emCentavos(valor) {
+export function emCentavos(valor) {
   return Math.round(Number(valor) * 100);
 }
 

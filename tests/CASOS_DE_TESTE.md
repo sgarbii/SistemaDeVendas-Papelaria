@@ -1,4 +1,4 @@
-# Casos de teste CT01 a CT15 e testes de segurança CS01 a CS11
+# Casos de teste CT01 a CT15 e testes de segurança CS01 a CS12
 
 Roteiro para executar os casos de teste da seção 10 do Documento de Requisitos.
 Para cada caso há os passos, o resultado esperado e um espaço para anotar o resultado obtido.
@@ -578,6 +578,27 @@ Se o hook não rodar, instale com `npm install` (script `prepare`).
 
 ---
 
+## CS12: Visitante tenta descobrir quem escreveu cada avaliação
+
+**Requisitos:** RNF14, RE01 (LGPD).
+
+No SQL Editor, depois da migration `12`:
+
+```sql
+set role anon;
+select id, nota, comentario from public.avaliacoes limit 3;   -- funciona (página do produto)
+select cliente_id from public.avaliacoes limit 1;            -- deve falhar
+reset role;
+```
+
+**Resultado esperado:** a primeira consulta devolve as avaliações; a segunda dá
+`permission denied for table avaliacoes`. Pela API, `GET /rest/v1/avaliacoes?select=cliente_id`
+com a chave pública também é recusado.
+
+**Resultado obtido:** ☐ Passou ☐ Falhou
+
+---
+
 ## Testes de unidade (Vitest)
 
 ```powershell
@@ -585,5 +606,17 @@ npm install
 npm test
 ```
 
-Cobrem o subtotal e o total do carrinho, a validação de e-mail e senha, o comentário obrigatório, a formatação
-de preço e CEP e o escape de HTML. Eles ficam em `tests/*.test.js`.
+Cobrem o subtotal e o total do carrinho, a validação de e-mail, senha e do formulário de produto, o comentário obrigatório,
+a formatação de preço e CEP, o escape de HTML, a tradução dos erros do banco e as contas do dashboard
+(faturamento só de pedidos pagos, comparação entre períodos, dias sem venda, ranking, escala do gráfico e
+proteção contra *CSV injection*). Eles ficam em `tests/*.test.js`.
+
+## Dashboard de vendas (roteiro manual)
+
+1. Rode `supabase/dados-demo/pedidos_demo.sql` (opcional) e entre como admin em `/admin/index.html`.
+2. Troque entre 7, 30 e 90 dias: os indicadores e o gráfico mudam, e cada indicador mostra a variação em relação ao período anterior.
+3. Com o painel aberto, faça uma compra com uma conta de cliente em outra janela: aparece o aviso "Novo pedido nº …" e os números se atualizam sozinhos.
+4. Clique em **Baixar relatório (CSV)** e abra no Excel: uma linha por pedido do período, com acentos e valores corretos.
+5. Entre com uma conta de cliente comum em `/admin/index.html`: aparece "Acesso restrito" (e o banco não devolve os pedidos de outros clientes).
+
+**Resultado obtido:** ☐ Passou ☐ Falhou

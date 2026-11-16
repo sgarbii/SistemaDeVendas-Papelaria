@@ -41,13 +41,24 @@ export function termoDeBuscaValido(termo) {
   return String(termo ?? '').trim().length > 0;
 }
 
-// imagem_url só pode ser (a) uma imagem do seed, que fica no próprio site,
+// Formulário de produto do painel (RF07). Devolve { campo: mensagem } só com
+// os campos inválidos; objeto vazio = tudo certo. O banco repete as regras (CHECKs).
+export function validarProduto({ nome, preco, estoque, categoriaId }) {
+  const erros = {};
+  if (!String(nome ?? '').trim()) erros.nome = 'Informe o nome.';
+  if (!(preco > 0)) erros.preco = 'O preço precisa ser maior que zero.';
+  if (!Number.isInteger(estoque) || estoque < 0) erros.estoque = 'Informe um número inteiro, zero ou maior.';
+  if (!categoriaId) erros.categoria = 'Escolha a categoria.';
+  return erros;
+}
+
+// imagem_url só pode ser (a) uma foto WEBP do seed, que fica no próprio site,
 // ou (b) um arquivo do bucket "produtos" do NOSSO projeto Supabase, com nome
 // UUID. Qualquer outra coisa (outro site, "javascript:", SVG enviado) é recusada.
-// O banco tem a mesma regra num CHECK (01_tabelas.sql).
+// O banco tem a mesma regra num CHECK (11_fotos_e_tempo_real.sql).
 export function imagemPermitida(url, supabaseUrl) {
   const texto = String(url ?? '');
-  if (/^\/img\/produtos\/[a-z0-9-]+\.svg$/.test(texto)) return true;
+  if (/^\/img\/produtos\/[a-z0-9-]+\.webp$/.test(texto)) return true;
 
   const prefixo = `${supabaseUrl}/storage/v1/object/public/produtos/`;
   return supabaseUrl?.startsWith('https://') === true

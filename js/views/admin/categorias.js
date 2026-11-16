@@ -45,7 +45,7 @@ function mostrarLista(categorias) {
   });
 
   trocarConteudo(conteudo,
-    el('div', { class: 'barra-titulo' }, el('h1', { class: 'titulo-pagina' }, el('span', { class: 'grifo' }, 'Categorias'))),
+    el('div', { class: 'barra-titulo' }, el('h1', { class: 'titulo-pagina' }, 'Categorias')),
     formNova,
     el('table', { class: 'tabela' },
       el('thead', {}, el('tr', {},

@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatarPreco, formatarCep, formatarTelefone, formatarTempo, formatarNota,
-  prepararTermoBusca, escaparCuringasLike,
+  prepararTermoBusca, escaparCuringasLike, formatarPrecoCurto, formatarDiaMes, gerarSlug,
 } from '../js/utils/formatacao.js';
 
 // O Intl usa um espaço especial (não separável) entre "R$" e o número.
@@ -98,5 +98,26 @@ describe('escaparCuringasLike (busca com ilike)', () => {
 
   it('texto comum não muda', () => {
     expect(escaparCuringasLike('caderno')).toBe('caderno');
+  });
+});
+
+describe('formatarPrecoCurto', () => {
+  it('abrevia os milhares para o eixo dos gráficos', () => {
+    expect(semEspacoEspecial(formatarPrecoCurto(1500))).toBe('R$ 1,5 mil');
+    expect(semEspacoEspecial(formatarPrecoCurto(250))).toBe('R$ 250');
+  });
+});
+
+describe('formatarDiaMes', () => {
+  it('mostra dia e mês com dois dígitos', () => {
+    expect(formatarDiaMes(new Date('2026-11-05T10:00:00'))).toBe('05/11');
+  });
+});
+
+describe('gerarSlug', () => {
+  it('tira acentos e espaços do nome da categoria', () => {
+    expect(gerarSlug('Cadernos e Papéis')).toBe('cadernos-e-papeis');
+    expect(gerarSlug('Informática')).toBe('informatica');
+    expect(gerarSlug('  Arte & Desenho! ')).toBe('arte-desenho');
   });
 });

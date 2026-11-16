@@ -18,7 +18,7 @@ simulado e avalia o que comprou. O administrador gerencia produtos, categorias, 
 |---|---|---|
 | **Básico** | Cadastro e login com aceite do termo; página inicial com busca e categorias; página do produto; carrinho; finalizar compra com pagamento simulado; Meus pedidos | RF01, RF03, RF04, RF06 |
 | **Intermediário** | Edição de perfil e exclusão de conta (LGPD); dados guardados no PostgreSQL; CRUD de produtos (com imagem) e categorias no painel; mudança de status dos pedidos | RF05, RF07, RE01 |
-| **Avançado** | Reserva automática de 15 min (pg_cron) e conferência na finalização; avaliações só de quem comprou, com edição em até 7 dias; consulta de CEP no ViaCEP; resumo no painel (pedidos e faturamento do dia, estoque baixo) | RF02, RN01, RN02, RN04, RNF16 |
+| **Avançado** | Regras automatizadas: reserva de 15 min (pg_cron) e conferência na finalização; avaliações só de quem comprou, com edição em até 7 dias. API externa: CEP pelo ViaCEP. **Dashboard de vendas** no painel: faturamento, pedidos, ticket médio e itens vendidos com comparação ao período anterior (7, 30 ou 90 dias), gráfico de faturamento por dia, pedidos por situação, vendas por categoria, mais vendidos, estoque baixo, **pedidos novos em tempo real** (Supabase Realtime) e **relatório em CSV** | RF02, RN01, RN02, RN04, RNF16 |
 
 Fora do MVP (seção 11): pagamento real, bloqueio de conta (RN03), variações de cor e modelo, e frete.
 
@@ -29,6 +29,7 @@ Fora do MVP (seção 11): pagamento real, bloqueio de conta (RN03), variações 
 - Supabase: Auth, API REST, Storage e PostgreSQL com RLS, funções PL/pgSQL e pg_cron
 - ViaCEP (endereço pelo CEP), Netlify (hospedagem) e Vitest (testes de unidade)
 - Fontes Young Serif e Atkinson Hyperlegible (licença OFL), servidas pelo próprio site
+- Gráficos do dashboard desenhados em SVG pelo próprio código (sem biblioteca externa)
 
 ## Organização das pastas
 
@@ -42,15 +43,17 @@ Dentro de `commit/`:
 
 ```
 index.html, produto.html, carrinho.html, pedidos.html, perfil.html, login.html
-admin/                 painel (resumo, produtos, categorias, pedidos, avaliações)
-css/tema.css           ÚNICO lugar com as cores (paleta a definir com o cliente)
+admin/                 painel (dashboard de vendas, produtos, categorias, pedidos, avaliações)
+css/tema.css           ÚNICO lugar com as cores e fontes
+img/                   fotos dos produtos e categorias, banner, ilustrações e ícones (WEBP)
 js/config.js           URL e chave PÚBLICA do Supabase
 js/services/           acesso ao Supabase: supabase, auth, produtos, carrinho, pedidos, cep, avaliacoes, admin
 js/views/              código de cada tela
-js/utils/              formatação, validação, escape de HTML e cálculos
+js/utils/              formatação, validação, escape de HTML, cálculos do carrinho e do dashboard
 js/vendor/             supabase-js empacotado (gerado por npm run vendor)
 fonts/                 fontes locais e suas licenças
-supabase/migrations/   tabelas, funções, RLS, Storage, pg_cron e seed (rodar em ordem)
+supabase/migrations/   tabelas, funções, RLS, Storage, pg_cron, seed e Realtime (rodar em ordem)
+supabase/dados-demo/   pedidos de demonstração para o dashboard (opcional)
 scripts/               verificador de segredos, hook de pre-commit, cópia do vendor e build do Netlify
 tests/                 testes Vitest e roteiro CT01–CT15 e CS01–CS11
 docs/                  documento de requisitos e SEGURANCA.md
@@ -70,9 +73,14 @@ Em supabase.com → **New project**. Escolha um nome, uma senha do banco e a reg
 ### 2. Rodar as migrations em ordem
 No painel: **SQL Editor** → **New query**. Abra cada arquivo de `supabase/migrations/`, cole o conteúdo e clique em **Run**, **nesta ordem**:
 
-`01_tabelas` → `02_perfis_e_admin` → `03_carrinho` → `04_pedidos` → `05_avaliacoes` → `06_rls` → `07_storage` → `08_pg_cron` → `09_seed` → `10_ajustes_security_advisor`
+`01_tabelas` → `02_perfis_e_admin` → `03_carrinho` → `04_pedidos` → `05_avaliacoes` → `06_rls` → `07_storage` → `08_pg_cron` → `09_seed` → `10_ajustes_security_advisor` → `11_fotos_e_tempo_real` → `12_colunas_das_avaliacoes`
 
 A `10` aplica as correções do Security Advisor do Supabase (veja [docs/SEGURANCA.md](docs/SEGURANCA.md)).
+A `11` troca as imagens do seed pelas fotos WEBP e liga o Realtime na tabela `pedidos` (o dashboard avisa na hora quando chega um pedido).
+A `12` é uma correção de segurança: a API deixa de mostrar quem escreveu cada avaliação (`cliente_id`).
+
+**Opcional, para a apresentação:** `supabase/dados-demo/pedidos_demo.sql` cria cerca de 180 pedidos anônimos nos últimos 90 dias,
+para o dashboard ter gráficos. Não mexe no estoque. O próprio arquivo traz o comando para apagar esses pedidos depois.
 Migrations já aplicadas não são editadas: cada mudança no banco entra num arquivo novo, com o próximo número.
 
 ### 3. Ativar o pg_cron
@@ -153,7 +161,7 @@ git status            # confira a lista do que vai entrar
 ## Deploy no Netlify
 
 1. Suba o repositório (pasta `commit`) para o GitHub, com `js/config.js` preenchido.
-2. No `netlify.toml`, troque as duas ocorrências de `SEU-PROJETO` pelo id do seu projeto (o mesmo de `js/config.js`).
+2. No `netlify.toml`, troque as ocorrências de `SEU-PROJETO` pelo id do seu projeto (o mesmo de `js/config.js`), inclusive no `wss://` do Realtime.
    O build confere isso e **falha de propósito** se a CSP e o `config.js` não apontarem para o mesmo projeto.
 3. Em [app.netlify.com](https://app.netlify.com): **Add new site → Import an existing project → GitHub**, escolha o repositório e clique em **Deploy**.
    As configurações de build vêm do `netlify.toml`, que publica só os arquivos do site.
@@ -167,9 +175,10 @@ npm test              # testes de unidade (Vitest)
 npm run verificar     # verificador de segredos
 ```
 
-Os testes de unidade cobrem subtotal e total do carrinho, validação de e-mail e senha, comentário obrigatório,
-formatação de preço e CEP, escape de HTML, validação de `imagem_url` e redirecionamento seguro.
-Os casos CT01 a CT15 e os testes de segurança CS01 a CS11, com os comandos SQL, estão em
+Os testes de unidade cobrem subtotal e total do carrinho, validação de e-mail, senha e do formulário de produto, comentário obrigatório,
+formatação de preço e CEP, escape de HTML, validação de `imagem_url`, redirecionamento seguro, tradução dos erros do banco
+e as contas do dashboard (faturamento, comparação entre períodos, gráficos e relatório CSV).
+Os casos CT01 a CT15 e os testes de segurança CS01 a CS12, com os comandos SQL, estão em
 [tests/CASOS_DE_TESTE.md](tests/CASOS_DE_TESTE.md).
 
 ## Atualizar o supabase-js

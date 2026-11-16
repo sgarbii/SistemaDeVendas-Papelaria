@@ -2,7 +2,7 @@
 // Leitura pública: funciona sem login (RU08).
 import { supabase, executar } from './supabase.js';
 import { SUPABASE_URL } from '../config.js';
-import { prepararTermoBusca, escaparCuringasLike } from '../utils/formatacao.js';
+import { prepararTermoBusca, escaparCuringasLike, gerarSlug } from '../utils/formatacao.js';
 import { imagemPermitida } from '../utils/validacao.js';
 import { ordenarPorPopularidade } from '../utils/calculos.js';
 
@@ -83,4 +83,14 @@ export async function listarAvaliacoes(produtoId) {
 // do próprio projeto. Qualquer outro endereço vira a imagem padrão.
 export function urlImagem(produto) {
   return imagemPermitida(produto?.imagem_url, SUPABASE_URL) ? produto.imagem_url : '/img/sem-imagem.svg';
+}
+
+// Fotos das categorias do seed (img/categorias/<slug>.webp). Uma categoria
+// criada depois no painel aparece sem foto (null).
+const CATEGORIAS_COM_FOTO = new Set([
+  'escolar', 'cadernos-e-papeis', 'escritorio', 'informatica', 'arte-e-desenho', 'organizacao',
+]);
+export function urlImagemCategoria(categoria) {
+  const slug = gerarSlug(categoria?.nome);
+  return CATEGORIAS_COM_FOTO.has(slug) ? `/img/categorias/${slug}.webp` : null;
 }

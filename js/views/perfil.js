@@ -83,7 +83,7 @@ function mostrarPerfil(perfil) {
   });
 
   trocarConteudo(conteudo,
-    el('h1', { class: 'titulo-pagina' }, 'Meu ', el('span', { class: 'grifo' }, 'perfil')),
+    el('h1', { class: 'titulo-pagina' }, 'Meu perfil'),
     el('p', { class: 'subtitulo' }, `Termo de uso de dados aceito em ${formatarData(perfil.termo_aceito_em)}.`),
     el('div', { class: 'layout-perfil' },
       form,

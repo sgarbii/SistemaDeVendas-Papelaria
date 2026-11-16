@@ -5,7 +5,7 @@ import { formatarPreco, formatarDataHora } from '../../utils/formatacao.js';
 import { mostrarCarregando, mostrarErro, mostrarVazio, avisar } from '../componentes.js';
 import { montarPainel } from './painel.js';
 import { listarTodosPedidos, mudarStatusPedido } from '../../services/admin.js';
-import { NOMES_STATUS, FORMAS_PAGAMENTO } from '../../services/pedidos.js';
+import { NOMES_STATUS, FORMAS_PAGAMENTO } from '../../utils/constantes.js';
 
 const conteudo = document.getElementById('conteudo');
 
@@ -21,7 +21,7 @@ async function carregar() {
 }
 
 function mostrarLista(pedidos) {
-  const titulo = el('div', { class: 'barra-titulo' }, el('h1', { class: 'titulo-pagina' }, el('span', { class: 'grifo' }, 'Pedidos')));
+  const titulo = el('div', { class: 'barra-titulo' }, el('h1', { class: 'titulo-pagina' }, 'Pedidos'));
   if (pedidos.length === 0) {
     const area = el('div');
     mostrarVazio(area, { titulo: 'Nenhum pedido ainda', texto: 'Os pedidos dos clientes aparecem aqui.' });

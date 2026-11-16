@@ -4,7 +4,7 @@ import { mensagemDeErro } from '../services/supabase.js';
 import { el, trocarConteudo } from '../utils/html.js';
 import { validarEmail, validarSenha, validarNome, destinoSeguro, SENHA_MINIMA } from '../utils/validacao.js';
 import { montarPagina } from './cabecalho.js';
-import { marcarErro, limparErro } from './componentes.js';
+import { ilustracao, marcarErro, limparErro } from './componentes.js';
 import { obterSessao, entrar, cadastrar } from '../services/auth.js';
 
 const conteudo = document.getElementById('conteudo');
@@ -51,11 +51,17 @@ function montarTela(modo) {
   abaCadastro.addEventListener('click', () => selecionar('cadastro'));
 
   trocarConteudo(conteudo,
-    el('section', { class: 'cartao-login' },
-      el('h1', { class: 'titulo-pagina' }, 'Sua ', el('span', { class: 'grifo' }, 'conta')),
-      mensagem,
-      el('div', { class: 'abas', role: 'tablist' }, abaEntrar, abaCadastro),
-      painel
+    el('div', { class: 'layout-login' },
+      el('div', { class: 'login-lado' },
+        ilustracao('login', 'ilustracao-login'),
+        el('p', {}, 'Navegue sem conta. Para usar o carrinho, comprar e avaliar, entre ou crie a sua em menos de um minuto.')
+      ),
+      el('section', { class: 'cartao-login' },
+        el('h1', { class: 'titulo-pagina' }, 'Sua conta'),
+        mensagem,
+        el('div', { class: 'abas', role: 'tablist' }, abaEntrar, abaCadastro),
+        painel
+      )
     )
   );
   selecionar(modo);

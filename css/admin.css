@@ -27,8 +27,6 @@
 .admin-topo .etiqueta {
   font-size: .8rem;
   font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
   color: var(--cor-marca-texto);
 }
 .admin-topo a.link-claro,
@@ -82,10 +80,10 @@
 }
 .barra-titulo h1 { margin: 0; }
 
-/* cartões do resumo do dia */
+/* cartões de indicadores do dashboard */
 .cartoes-resumo {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -98,8 +96,8 @@
 }
 .cartao-resumo .rotulo { font-weight: 700; color: var(--cor-texto-suave); }
 .cartao-resumo .valor { display: block; font-family: var(--fonte-titulo); font-size: 2.4rem; line-height: 1.1; margin-top: 6px; }
-.cartao-resumo.destaque { background: var(--cor-marca-texto); }
-.cartao-resumo.destaque .rotulo { color: var(--cor-texto); }
+.cartao-resumo.principal { background: var(--cor-marca-texto); }
+.cartao-resumo.principal .rotulo { color: var(--cor-texto); }
 
 /* tabela que vira cartões no celular (sem rolagem horizontal) */
 .tabela {
@@ -113,7 +111,7 @@
 }
 .tabela th,
 .tabela td { padding: .7rem .8rem; text-align: left; vertical-align: middle; border-bottom: 1px solid var(--cor-borda); }
-.tabela th { background: var(--cor-superficie-2); font-size: .85rem; letter-spacing: .04em; text-transform: uppercase; }
+.tabela th { background: var(--cor-superficie-2); font-size: .85rem; }
 .tabela tr:last-child td { border-bottom: 0; }
 .tabela img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 2px solid var(--cor-texto); }
 .tabela .numero { text-align: right; font-variant-numeric: tabular-nums; }
@@ -168,3 +166,137 @@
 
 .form-inline { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 20px; }
 .form-inline .campo { flex: 1 1 220px; }
+
+/* ---------- dashboard de vendas ---------- */
+.topo-dashboard { align-items: flex-end; }
+.topo-dashboard h1 { margin: 0 0 .25rem; }
+.acoes-dashboard { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.seletor-periodo {
+  display: inline-flex;
+  border: 2px solid var(--cor-texto);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--cor-superficie);
+}
+.seletor-periodo button {
+  min-height: 44px;
+  padding: 0 .9rem;
+  border: 0;
+  border-left: 2px solid var(--cor-texto);
+  background: none;
+  color: var(--cor-texto);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.seletor-periodo button:first-child { border-left: 0; }
+.seletor-periodo button:hover { background: var(--cor-superficie-2); }
+.seletor-periodo button[aria-pressed="true"] { background: var(--cor-marca-texto); }
+
+/* indicador do Supabase Realtime */
+.ao-vivo { display: inline-flex; align-items: center; gap: .45rem; font-size: .85rem; font-weight: 700; color: var(--cor-sucesso); }
+.ao-vivo::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: currentColor; animation: piscar 1.6s ease-in-out infinite; }
+.ao-vivo.conectando,
+.ao-vivo.desligado { color: var(--cor-texto-suave); }
+.ao-vivo.conectando::before,
+.ao-vivo.desligado::before { animation: none; }
+@keyframes piscar { 50% { opacity: .25; } }
+
+.faixa-hoje {
+  display: inline-block;
+  margin: 0 0 16px;
+  padding: .5rem .9rem;
+  border: 2px dashed var(--cor-borda);
+  border-radius: 10px;
+  background: var(--cor-superficie);
+}
+
+.variacao { display: block; margin-top: 8px; font-size: .85rem; font-weight: 700; color: var(--cor-texto-suave); }
+.variacao.subiu { color: var(--cor-sucesso); }
+.variacao.caiu { color: var(--cor-erro); }
+
+.grade-dashboard { display: grid; gap: 20px; }
+.grade-dashboard > .painel { margin-top: 0; min-width: 0; }
+@media (min-width: 700px) {
+  .grade-dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bloco-largo,
+  .bloco-inteiro { grid-column: 1 / -1; }
+}
+@media (min-width: 1000px) {
+  .grade-dashboard { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .bloco-largo { grid-column: span 2; }
+}
+.bloco-dashboard h2 { font-size: 1.2rem; margin-bottom: .6rem; }
+.bloco-dashboard > .botao-texto { margin-top: 4px; padding-left: 0; }
+
+.grafico { margin: 0; }
+.destaque-grafico { margin: 0 0 6px; min-height: 1.5em; font-weight: 700; color: var(--cor-texto-suave); font-variant-numeric: tabular-nums; }
+
+/* colunas em SVG */
+.grafico-colunas { display: block; width: 100%; height: auto; overflow: visible; }
+.grafico-colunas .eixo line { stroke: var(--cor-borda); stroke-dasharray: 3 4; }
+.grafico-colunas text { font-family: var(--fonte-texto); font-size: 13px; fill: var(--cor-texto-suave); }
+.grafico-colunas .alvo { fill: transparent; }
+.grafico-colunas .barra { fill: var(--cor-primaria); transition: fill .15s ease; }
+.grafico-colunas .coluna:hover .barra { fill: var(--cor-compra); }
+
+/* barras horizontais */
+.barras { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.barras li { display: grid; grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr) auto; align-items: center; gap: 10px; font-size: .92rem; }
+.barras .nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barras .trilho { height: 14px; border-radius: 999px; background: var(--cor-superficie-2); overflow: hidden; }
+.barras .barra { display: block; height: 100%; width: calc(var(--fatia, 0) * 100%); border-radius: inherit; background: var(--cor-primaria); }
+.barras .valor { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* barra empilhada das situações */
+.barra-status {
+  display: flex;
+  height: 24px;
+  margin-bottom: 14px;
+  border: 2px solid var(--cor-texto);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--cor-superficie-2);
+}
+.barra-status .fatia { flex: var(--peso, 1) 1 0; }
+.barra-status .fatia + .fatia { border-left: 2px solid var(--cor-texto); }
+.fatia-AGUARDANDO_PAGAMENTO { background: var(--cor-texto-suave); }
+.fatia-PAGO { background: var(--cor-primaria); }
+.fatia-ENVIADO { background: var(--cor-marca-texto); }
+.fatia-ENTREGUE { background: var(--cor-sucesso); }
+.fatia-CANCELADO { background: var(--cor-erro); }
+.legenda-status { display: grid; gap: 6px; margin: 0 0 8px; padding: 0; list-style: none; }
+.legenda-status li { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; align-items: center; gap: 8px; font-size: .92rem; }
+.amostra { width: 14px; height: 14px; border: 1.5px solid var(--cor-texto); border-radius: 4px; }
+
+/* mais vendidos */
+.ranking { margin: 0; padding: 0; list-style: none; }
+.ranking li {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--cor-borda);
+}
+.ranking li:last-child { border-bottom: 0; }
+.ranking img { width: 48px; height: 48px; object-fit: cover; border: 2px solid var(--cor-texto); border-radius: 8px; background: var(--cor-papel-foto); }
+.ranking .nome { font-size: .92rem; font-weight: 700; line-height: 1.3; }
+.ranking .numeros { display: flex; flex-direction: column; text-align: right; font-size: .85rem; color: var(--cor-texto-suave); white-space: nowrap; }
+.ranking .numeros strong { color: var(--cor-texto); font-size: .95rem; }
+
+/* últimos pedidos */
+.lista-ultimos { margin: 0; padding: 0; list-style: none; }
+.lista-ultimos li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--cor-borda);
+}
+.lista-ultimos li:last-child { border-bottom: 0; }
+.lista-ultimos .numero-pedido { font-weight: 700; min-width: 5.5em; }
+.lista-ultimos .quando { flex: 1 1 8rem; color: var(--cor-texto-suave); font-size: .9rem; }
+.lista-ultimos .total { min-width: 6.5em; text-align: right; font-variant-numeric: tabular-nums; }

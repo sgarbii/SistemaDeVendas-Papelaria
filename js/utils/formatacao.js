@@ -8,6 +8,14 @@ export function formatarPreco(valor) {
   return formatadorPreco.format(Number(valor) || 0);
 }
 
+// Valores do eixo dos gráficos: 1500 -> "R$ 1,5 mil"
+const formatadorPrecoCurto = new Intl.NumberFormat('pt-BR', {
+  style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1,
+});
+export function formatarPrecoCurto(valor) {
+  return formatadorPrecoCurto.format(Number(valor) || 0);
+}
+
 export function apenasDigitos(texto) {
   return String(texto ?? '').replace(/\D/g, '');
 }
@@ -31,6 +39,11 @@ export function formatarData(dataIso) {
   return new Date(dataIso).toLocaleDateString('pt-BR');
 }
 
+// "2026-11-05T10:00" -> "05/11" (dias no eixo do gráfico)
+export function formatarDiaMes(data) {
+  return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
 export function formatarDataHora(dataIso) {
   return new Date(dataIso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 }
@@ -46,6 +59,16 @@ export function formatarTempo(milissegundos) {
 // Nota média com uma casa: 4.5 -> "4,5"
 export function formatarNota(nota) {
   return Number(nota || 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+// Nome da categoria vira nome de arquivo: "Cadernos e Papéis" -> "cadernos-e-papeis"
+export function gerarSlug(texto) {
+  return String(texto ?? '')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '') // tira os acentos que o NFD separou da letra
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 // Busca (RNF10): tira espaços repetidos e limita a 100 caracteres

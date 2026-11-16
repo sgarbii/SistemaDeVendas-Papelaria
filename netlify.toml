@@ -26,9 +26,10 @@
   [headers.values]
     # O navegador só usa HTTPS neste domínio por 1 ano
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    # Só roda script do próprio site, só conversa com o Supabase e o ViaCEP,
+    # Só roda script do próprio site, só conversa com o Supabase (HTTPS e o
+    # WebSocket do Realtime, usado no dashboard) e o ViaCEP,
     # sem estilos ou scripts inline (protege contra XSS)
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://eyadyrrgavrnlrhbisdr.supabase.co; connect-src 'self' https://eyadyrrgavrnlrhbisdr.supabase.co https://viacep.com.br; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://eyadyrrgavrnlrhbisdr.supabase.co; connect-src 'self' https://eyadyrrgavrnlrhbisdr.supabase.co wss://eyadyrrgavrnlrhbisdr.supabase.co https://viacep.com.br; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests"
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"

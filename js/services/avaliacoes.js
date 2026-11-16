@@ -2,6 +2,10 @@
 // Quem pode avaliar e editar é decidido pelas políticas RLS do banco.
 import { supabase, executar, ErroDoSistema } from './supabase.js';
 
+// Só as colunas que o banco libera para leitura (12_colunas_das_avaliacoes.sql):
+// pedir todas com select() daria erro de permissão por causa do cliente_id.
+const CAMPOS_AVALIACAO = 'id, nota, comentario, publicado_em';
+
 // Avaliacao.publicar(): produto, autor e data são preenchidos pelo banco
 export async function publicarAvaliacao(pedidoItemId, nota, comentario) {
   try {
@@ -9,7 +13,7 @@ export async function publicarAvaliacao(pedidoItemId, nota, comentario) {
       supabase
         .from('avaliacoes')
         .insert({ pedido_item_id: pedidoItemId, nota, comentario: comentario.trim() })
-        .select()
+        .select(CAMPOS_AVALIACAO)
         .single()
     );
   } catch (erro) {
@@ -29,7 +33,7 @@ export async function editarAvaliacao(id, nota, comentario) {
       .from('avaliacoes')
       .update({ nota, comentario: comentario.trim() })
       .eq('id', id)
-      .select()
+      .select(CAMPOS_AVALIACAO)
   );
   if (linhas.length === 0) {
     throw new ErroDoSistema('O prazo de 7 dias para editar esta avaliação terminou.');

@@ -339,14 +339,16 @@ main { flex: 1; padding: 24px 0 56px; }
   font-size: .9rem;
   color: var(--cor-texto-suave);
 }
-.rodape .container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
 .rodape p { margin: 0; }
+.rodape-grade { display: grid; gap: 20px 32px; align-items: start; }
+@media (min-width: 760px) {
+  .rodape-grade { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; }
+}
+.rodape-marca .logo { font-size: 1.5rem; }
+.rodape-marca p { margin-top: .7rem; max-width: 36ch; }
+.rodape-links { display: flex; flex-direction: column; gap: .2rem; }
+.rodape-links a { color: var(--cor-texto); padding: .2rem 0; }
+.rodape-nota { grid-column: 1 / -1; padding-top: 14px; border-top: 1px dashed var(--cor-borda); font-size: .85rem; }
 
 /* ---------- selo de compra segura (RNF04) ---------- */
 .selo-seguro {
@@ -362,7 +364,7 @@ main { flex: 1; padding: 24px 0 56px; }
 }
 .selo-seguro strong { display: block; font-family: var(--fonte-titulo); font-weight: 400; font-size: 1.05rem; }
 .selo-seguro small { display: block; font-size: .8rem; }
-.selo-seguro .icone { width: 1.8em; height: 1.8em; }
+.selo-seguro img { width: 2.6em; height: 2.6em; flex: none; }
 
 /* ---------- títulos de seção ---------- */
 .titulo-pagina { font-size: clamp(1.7rem, 4vw, 2.4rem); }
@@ -426,28 +428,161 @@ main { flex: 1; padding: 24px 0 56px; }
   aspect-ratio: 1;
   object-fit: cover;
   border-bottom: 2px solid var(--cor-texto);
-  background: var(--cor-superficie-2);
+  background: var(--cor-papel-foto);
 }
 .cartao-corpo { display: flex; flex-direction: column; gap: .3rem; padding: .8rem .9rem 1rem; flex: 1; }
 .cartao-categoria {
-  font-size: .75rem;
+  font-size: .82rem;
   font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
   color: var(--cor-texto-suave);
 }
 .cartao-nome { font-family: var(--fonte-titulo); font-size: 1rem; line-height: 1.3; margin: 0; }
 .cartao-preco { font-size: 1.25rem; font-weight: 700; margin-top: auto; }
 .cartao-esgotado { font-size: .85rem; font-weight: 700; color: var(--cor-erro); }
 
-/* entrada em cascata dos cartões */
-.surgir {
-  animation: surgir .45s cubic-bezier(.2, .8, .3, 1) both;
-  animation-delay: calc(var(--ordem, 0) * 45ms);
+@keyframes entrar {
+  from { opacity: 0; transform: translateY(10px); }
 }
-@keyframes surgir {
-  from { opacity: 0; transform: translateY(14px) rotate(.6deg); }
+
+/* ---------- página inicial ---------- */
+/* Destaque: a foto da mesa de estudos com o título na parte vazia do papel.
+   No celular o texto vem antes da foto, para nunca cobrir os objetos. */
+.destaque {
+  position: relative;
+  display: grid;
+  margin: 4px 0 56px;
+  border: 2px solid var(--cor-texto);
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--cor-papel-foto);
+  box-shadow: 6px 6px 0 var(--cor-texto);
 }
+.destaque picture { order: 2; }
+.destaque img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: center bottom; }
+.destaque-texto { padding: 28px 20px 8px; }
+.destaque h1 {
+  font-size: clamp(2rem, 4.4vw, 3.5rem);
+  line-height: 1.06;
+  letter-spacing: -.01em;
+  margin: 0 0 .45em;
+  text-wrap: balance;
+}
+.destaque p { max-width: 38ch; margin: 0 0 1.4rem; font-size: 1.0625rem; }
+.destaque-acoes { display: flex; flex-wrap: wrap; gap: 12px; }
+
+@media (min-width: 700px) {
+  .destaque { display: block; }
+  .destaque img { aspect-ratio: 16 / 9; max-height: 560px; object-position: right center; }
+  .destaque h1 { max-width: 13ch; }
+  .destaque-texto {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 43%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 32px 0 32px clamp(24px, 5vw, 64px);
+  }
+}
+
+/* o único movimento automático da loja: o destaque entra quando a página abre */
+.destaque-texto > * { animation: entrar .6s cubic-bezier(.2, .8, .3, 1) both; }
+.destaque-texto > :nth-child(2) { animation-delay: .1s; }
+.destaque-texto > :nth-child(3) { animation-delay: .2s; }
+
+.secao-inicio { margin-bottom: 56px; }
+.secao-inicio > h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+.secao-inicio > h2 + .subtitulo { margin-top: -.35rem; }
+
+/* categorias: foto com uma etiqueta de papel colada por cima */
+.grade-categorias {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 900px) {
+  .grade-categorias { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+}
+.bloco-categoria {
+  position: relative;
+  display: block;
+  border: 2px solid var(--cor-texto);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--cor-papel-foto);
+  color: var(--cor-texto);
+  text-decoration: none;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.bloco-categoria:hover { color: var(--cor-texto); transform: translate(-3px, -3px); box-shadow: 6px 6px 0 var(--cor-texto); }
+.bloco-categoria img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; transition: transform .4s ease; }
+.bloco-categoria:hover img { transform: scale(1.04); }
+.bloco-categoria.sem-foto { aspect-ratio: 3 / 2; }
+.bloco-categoria .etiqueta {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  max-width: calc(100% - 20px);
+  padding: .3rem .75rem;
+  border: 2px solid var(--cor-texto);
+  border-radius: 8px;
+  background: var(--cor-superficie);
+  box-shadow: 3px 3px 0 var(--cor-texto);
+  font-family: var(--fonte-titulo);
+  font-size: clamp(.95rem, 2.4vw, 1.2rem);
+  line-height: 1.25;
+  transform: rotate(-2deg);
+}
+.grade-categorias li:nth-child(even) .etiqueta { transform: rotate(1.5deg); }
+
+/* página da categoria: a foto vira a faixa do título */
+.faixa-categoria {
+  position: relative;
+  margin: 4px 0 20px;
+  border: 2px solid var(--cor-texto);
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--cor-papel-foto);
+  box-shadow: 6px 6px 0 var(--cor-texto);
+}
+.faixa-categoria img { width: 100%; height: clamp(160px, 26vw, 280px); object-fit: cover; }
+.faixa-categoria-texto {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  max-width: calc(100% - 32px);
+  padding: .75rem 1.1rem;
+  border: 2px solid var(--cor-texto);
+  border-radius: 12px;
+  background: var(--cor-superficie);
+}
+.faixa-categoria h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.4rem); }
+.faixa-categoria p { margin: .15rem 0 0; font-size: .9rem; color: var(--cor-texto-suave); }
+.faixa-categoria.sem-foto { border: 0; box-shadow: none; background: none; }
+.faixa-categoria.sem-foto .faixa-categoria-texto { position: static; padding: 0; border: 0; background: none; }
+
+/* o que a loja garante */
+.vantagens {
+  padding: 28px 22px;
+  border: 2px dashed var(--cor-borda);
+  border-radius: 20px;
+  background: var(--cor-superficie);
+}
+.vantagens ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.vantagens li { display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 14px; align-items: start; }
+.vantagens img { width: 64px; height: 64px; grid-row: span 2; }
+.vantagens h3 { font-size: 1.1rem; margin: 6px 0 .15rem; }
+.vantagens p { margin: 0; font-size: .92rem; color: var(--cor-texto-suave); }
 
 /* ---------- estrelas ---------- */
 .estrelas {
@@ -484,6 +619,7 @@ main { flex: 1; padding: 24px 0 56px; }
 .estado h2 { color: var(--cor-texto); font-size: 1.4rem; margin: 0; }
 .estado p { margin: 0; max-width: 46ch; }
 .estado .icone { width: 44px; height: 44px; color: var(--cor-texto); }
+.ilustracao-estado { width: min(220px, 60vw); height: auto; margin-bottom: .25rem; }
 .estado-erro .icone { color: var(--cor-erro); }
 
 .rodinha {
@@ -520,7 +656,7 @@ main { flex: 1; padding: 24px 0 56px; }
   box-shadow: 4px 4px 0 var(--cor-texto);
   font-weight: 700;
   pointer-events: auto;
-  animation: surgir .25s ease both;
+  animation: entrar .25s ease both;
 }
 .aviso.sucesso { background: var(--cor-sucesso-fundo); color: var(--cor-sucesso); }
 .aviso.alerta { background: var(--cor-alerta-fundo); color: var(--cor-alerta); }
@@ -604,7 +740,16 @@ details.termo summary { cursor: pointer; font-weight: 700; color: var(--cor-prim
 details.termo ul { padding-left: 1.2rem; margin: .5rem 0; }
 
 /* ---------- página de login ---------- */
+.layout-login { display: grid; gap: 24px; max-width: 980px; margin: 0 auto; align-items: center; }
+.login-lado { display: none; }
+@media (min-width: 860px) {
+  .layout-login { grid-template-columns: minmax(0, 1fr) 460px; gap: 56px; }
+  .login-lado { display: block; text-align: center; }
+  .ilustracao-login { width: 100%; max-width: 360px; height: auto; margin: 0 auto 16px; }
+  .login-lado p { max-width: 34ch; margin: 0 auto; color: var(--cor-texto-suave); font-size: 1.05rem; }
+}
 .cartao-login {
+  width: 100%;
   max-width: 460px;
   margin: 0 auto;
   padding: 24px;
@@ -648,7 +793,7 @@ details.termo ul { padding-left: 1.2rem; margin: .5rem 0; }
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 6px 6px 0 var(--cor-texto);
-  background: var(--cor-superficie-2);
+  background: var(--cor-papel-foto);
 }
 .produto-imagem img { width: 100%; aspect-ratio: 1; object-fit: cover; }
 .produto-info { display: flex; flex-direction: column; gap: 14px; }
@@ -824,7 +969,7 @@ details.termo ul { padding-left: 1.2rem; margin: .5rem 0; }
   border-radius: 18px;
   box-shadow: 6px 6px 0 var(--cor-texto);
 }
-.confirmacao .icone { width: 64px; height: 64px; color: var(--cor-sucesso); margin: 0 auto 8px; }
+.confirmacao .ilustracao-estado { margin: 0 auto 4px; }
 .confirmacao .acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 20px; }
 
 /* ---------- meus pedidos ---------- */
@@ -929,7 +1074,7 @@ dialog.janela::backdrop { background: rgba(28, 37, 65, .55); }
 .nota-escolhida { font-size: .9rem; color: var(--cor-texto-suave); }
 
 .agradecimento { text-align: center; padding: 12px 0; }
-.agradecimento .icone { width: 56px; height: 56px; color: var(--cor-sucesso); margin: 0 auto 6px; }
+.ilustracao-agradecimento { width: 150px; height: auto; margin: 0 auto 6px; }
 
 /* ---------- perfil ---------- */
 .layout-perfil { display: grid; gap: 24px; max-width: 760px; }

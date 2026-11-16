@@ -2,23 +2,6 @@
 import { supabase, executar } from './supabase.js';
 import { avisarMudanca } from './carrinho.js';
 
-export const FORMAS_PAGAMENTO = {
-  PIX: 'Pix',
-  CARTAO: 'Cartão de crédito',
-  BOLETO: 'Boleto',
-};
-
-export const NOMES_STATUS = {
-  AGUARDANDO_PAGAMENTO: 'Aguardando pagamento',
-  PAGO: 'Pago',
-  ENVIADO: 'Enviado',
-  ENTREGUE: 'Entregue',
-  CANCELADO: 'Cancelado',
-};
-
-// Só itens de pedidos pagos podem ser avaliados (RNF07)
-export const STATUS_AVALIAVEIS = ['PAGO', 'ENVIADO', 'ENTREGUE'];
-
 // Chama finalizar_pedido no banco. Resposta:
 //   { ok: true, pedido_id }  ou  { ok: false, avisos: [{ produto, mensagem }] }  (RN04)
 export async function finalizarPedido(endereco, formaPagamento) {

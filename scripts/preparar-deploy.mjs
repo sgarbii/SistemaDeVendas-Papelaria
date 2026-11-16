@@ -20,8 +20,10 @@ if (config.includes('COLE-AQUI')) {
 // 2) a CSP do netlify.toml libera o mesmo projeto?
 const toml = readFileSync('netlify.toml', 'utf8');
 const csp = toml.match(/Content-Security-Policy = "([^"]+)"/)?.[1] ?? '';
-if (!csp.includes(`connect-src 'self' ${url}`) || !csp.includes(`img-src 'self' data: ${url}`)) {
-  falhar(`a Content-Security-Policy do netlify.toml precisa usar ${url} em connect-src e img-src (troque SEU-PROJETO).`);
+const realtime = url.replace('https://', 'wss://');
+const cspOk = csp.includes(`connect-src 'self' ${url} ${realtime}`) && csp.includes(`img-src 'self' data: ${url}`);
+if (!cspOk) {
+  falhar(`a Content-Security-Policy do netlify.toml precisa usar ${url} (e ${realtime}) em connect-src, e ${url} em img-src.`);
 }
 
 // 3) copia só o site

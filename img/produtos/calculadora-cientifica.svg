@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Calculadora científica">
-<rect width="400" height="400" fill="#e7eef6"/>
-<g stroke="#2b2d42" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
-<rect x="120" y="60" width="160" height="280" rx="20" fill="#343a40"/>
-<rect x="140" y="82" width="120" height="50" rx="6" fill="#cde8d4"/>
-<rect x="140" y="150" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="171" y="150" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="202" y="150" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="233" y="150" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="140" y="186" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="171" y="186" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="202" y="186" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="233" y="186" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="140" y="222" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="171" y="222" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="202" y="222" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="233" y="222" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="140" y="258" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="171" y="258" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="202" y="258" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="233" y="258" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="140" y="294" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="171" y="294" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="202" y="294" width="23" height="24" rx="4" fill="#adb5bd"/><rect x="233" y="294" width="23" height="24" rx="4" fill="#e76f51"/>
-</g>
-</svg>

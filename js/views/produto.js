@@ -39,6 +39,7 @@ function mostrarNaoEncontrado() {
   mostrarVazio(conteudo, {
     titulo: 'Produto não encontrado',
     texto: 'Ele pode ter sido removido da loja.',
+    ilustracao: 'erro-404',
     extras: [el('a', { class: 'botao', href: '/index.html' }, 'Voltar para a loja')],
   });
 }
@@ -55,49 +56,12 @@ function mostrarProduto(produto, avaliacoes) {
   document.title = `${produto.nome} — Papelaria Online`;
 
   const areaEstoque = el('div', {}, textoEstoque(produto));
-  const podeComprar = produto.ativo && produto.estoque > 0;
   const quantidade = seletorQuantidade({ valor: 1, maximo: Math.max(produto.estoque, 1) });
-  const botaoComprar = el('button', { class: 'botao botao-compra', type: 'button' },
-    icone('carrinho'), 'Adicionar ao carrinho');
-
-  if (!podeComprar) {
+  const botaoComprar = botaoAdicionar(produto, quantidade, areaEstoque);
+  if (!podeComprar(produto)) {
     botaoComprar.disabled = true;
     quantidade.querySelectorAll('button, input').forEach((c) => { c.disabled = true; });
   }
-
-  // Cenário 01: um clique adiciona o item (RNF04)
-  botaoComprar.addEventListener('click', async () => {
-    // FA01: sem login, vai para o login e depois volta para este produto
-    if (!(await obterSessao())) {
-      irParaLogin();
-      return;
-    }
-
-    const pedida = quantidade.valor();
-    botaoComprar.disabled = true;
-    botaoComprar.lastChild.textContent = 'Adicionando…';
-    try {
-      const adicionada = await adicionarAoCarrinho(produto.id, pedida);
-      produto.estoque -= adicionada;
-      if (adicionada < pedida) {
-        // FA02: quantidade maior que o estoque -> limitada ao disponível
-        avisar(`Só havia ${adicionada} unidade(s) disponível(is). Adicionamos ${adicionada} ao carrinho.`, 'alerta');
-      } else {
-        avisar(`${adicionada > 1 ? `${adicionada} unidades adicionadas` : 'Produto adicionado'} ao carrinho!`);
-      }
-    } catch (erro) {
-      if (erro.semSessao) {
-        irParaLogin(); // sessão expirou (RNF02)
-        return;
-      }
-      if (/indispon/i.test(mensagemDeErro(erro))) produto.estoque = 0; // FE01: esgotou
-      avisar(mensagemDeErro(erro), 'erro'); // FE01 / FE02: o item não entra no carrinho
-    } finally {
-      trocarConteudo(areaEstoque, textoEstoque(produto));
-      botaoComprar.lastChild.textContent = 'Adicionar ao carrinho';
-      botaoComprar.disabled = !(produto.ativo && produto.estoque > 0);
-    }
-  });
 
   const nota = Number(produto.nota_media);
   const categoria = produto.categorias;
@@ -131,10 +95,53 @@ function mostrarProduto(produto, avaliacoes) {
   );
 }
 
+function podeComprar(produto) {
+  return produto.ativo && produto.estoque > 0;
+}
+
+// Cenário 01: um clique adiciona o item (RNF04)
+function botaoAdicionar(produto, quantidade, areaEstoque) {
+  const botao = el('button', { class: 'botao botao-compra', type: 'button' }, icone('carrinho'), 'Adicionar ao carrinho');
+  botao.addEventListener('click', async () => {
+    // FA01: sem login, vai para o login e depois volta para este produto
+    if (!(await obterSessao())) {
+      irParaLogin();
+      return;
+    }
+    botao.disabled = true;
+    botao.lastChild.textContent = 'Adicionando…';
+    await adicionar(produto, quantidade.valor());
+    trocarConteudo(areaEstoque, textoEstoque(produto));
+    botao.lastChild.textContent = 'Adicionar ao carrinho';
+    botao.disabled = !podeComprar(produto);
+  });
+  return botao;
+}
+
+async function adicionar(produto, pedida) {
+  try {
+    const adicionada = await adicionarAoCarrinho(produto.id, pedida);
+    produto.estoque -= adicionada;
+    if (adicionada < pedida) {
+      // FA02: quantidade maior que o estoque -> limitada ao disponível
+      avisar(`Só havia ${adicionada} unidade(s) disponível(is). Adicionamos ${adicionada} ao carrinho.`, 'alerta');
+    } else {
+      avisar(`${adicionada > 1 ? `${adicionada} unidades adicionadas` : 'Produto adicionado'} ao carrinho!`);
+    }
+  } catch (erro) {
+    if (erro.semSessao) {
+      irParaLogin(); // sessão expirou (RNF02)
+      return;
+    }
+    if (/indispon/i.test(mensagemDeErro(erro))) produto.estoque = 0; // FE01: esgotou
+    avisar(mensagemDeErro(erro), 'erro'); // FE01 / FE02: o item não entra no carrinho
+  }
+}
+
 // RF02: as avaliações aparecem na página do produto
 function secaoAvaliacoes(avaliacoes) {
   return el('section', { class: 'secao', id: 'avaliacoes', 'aria-labelledby': 'titulo-avaliacoes' },
-    el('h2', { id: 'titulo-avaliacoes' }, 'O que dizem ', el('span', { class: 'grifo' }, 'quem comprou')),
+    el('h2', { id: 'titulo-avaliacoes' }, 'O que diz quem comprou'),
     avaliacoes.length === 0
       ? el('p', { class: 'subtitulo' }, 'Este produto ainda não tem avaliações. Só quem compra pode avaliar.')
       : el('ul', { class: 'lista-avaliacoes' },

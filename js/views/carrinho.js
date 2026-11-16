@@ -6,13 +6,14 @@ import { formatarPreco, formatarTempo } from '../utils/formatacao.js';
 import { calcularSubtotal, calcularTotal, contarUnidades, tempoRestanteReserva } from '../utils/calculos.js';
 import { montarPagina } from './cabecalho.js';
 import {
-  icone, imagemProduto, seloCompraSegura, seletorQuantidade,
+  icone, ilustracao, imagemProduto, seloCompraSegura, seletorQuantidade,
   mostrarCarregando, mostrarErro, mostrarVazio, avisar,
 } from './componentes.js';
 import { camposEndereco, enderecoCompleto } from './endereco.js';
 import { exigirLogin, irParaLogin, obterPerfil } from '../services/auth.js';
 import { listarItens, alterarQuantidade, removerDoCarrinho } from '../services/carrinho.js';
-import { finalizarPedido, FORMAS_PAGAMENTO } from '../services/pedidos.js';
+import { finalizarPedido } from '../services/pedidos.js';
+import { FORMAS_PAGAMENTO } from '../utils/constantes.js';
 
 const conteudo = document.getElementById('conteudo');
 let itens = [];
@@ -53,6 +54,7 @@ function mostrarCarrinho() {
     mostrarVazio(conteudo, {
       titulo: 'Seu carrinho está vazio',
       texto: 'Que tal dar uma olhada nos produtos mais populares?',
+      ilustracao: 'carrinho-vazio',
       extras: [el('a', { class: 'botao botao-primario', href: '/index.html' }, 'Ver produtos')],
     });
     return;
@@ -62,7 +64,7 @@ function mostrarCarrinho() {
   const unidades = contarUnidades(itens);
 
   trocarConteudo(conteudo,
-    el('h1', { class: 'titulo-pagina' }, 'Seu ', el('span', { class: 'grifo' }, 'carrinho')),
+    el('h1', { class: 'titulo-pagina' }, 'Seu carrinho'),
     el('p', { class: 'subtitulo' }, 'Cada item fica reservado para você por 15 minutos.'),
     el('div', { class: 'layout-carrinho' },
       el('ul', { class: 'lista-carrinho' }, itens.map(linhaItem)),
@@ -183,93 +185,92 @@ async function recarregarSemPiscar() {
 // tela é mostrada de novo depois de um ajuste da RN04 (para não perder o que foi digitado)
 async function mostrarCheckout(avisosRn04 = null, enderecoAnterior = null, pagamentoAnterior = 'PIX') {
   pararCronometro();
-  let perfil = null;
-  if (!enderecoAnterior) {
-    try {
-      perfil = await obterPerfil();
-    } catch {
-      // sem o perfil, o cliente só digita o endereço
-    }
-  }
-
-  const endereco = camposEndereco(enderecoAnterior ?? perfil ?? {});
-  const total = calcularTotal(itens.map(paraCalculo));
-
-  const formasPagamento = el('fieldset', { class: 'formas-pagamento' },
-    el('legend', { class: 'legenda' }, 'Forma de pagamento'),
-    Object.entries(FORMAS_PAGAMENTO).map(([valor, nome]) =>
-      el('label', { class: 'forma' },
-        el('input', { type: 'radio', name: 'pagamento', value: valor, checked: valor === pagamentoAnterior }),
-        nome
-      )
-    )
-  );
-
+  const endereco = camposEndereco(enderecoAnterior ?? await perfilOuVazio());
   const botaoConfirmar = el('button', { class: 'botao botao-compra botao-largo', type: 'submit' },
     avisosRn04 ? 'Confirmar com as mudanças' : 'Confirmar pedido e pagar');
 
   const form = el('form', { class: 'layout-carrinho', novalidate: true },
     el('div', {},
       avisosRn04 ? caixaAvisos(avisosRn04) : null,
-      el('section', { class: 'painel' },
-        el('h2', {}, '1. Endereço de entrega'),
-        endereco.elemento
-      ),
+      el('section', { class: 'painel' }, el('h2', {}, '1. Endereço de entrega'), endereco.elemento),
       el('section', { class: 'painel' },
         el('h2', {}, '2. Pagamento'),
         el('p', { class: 'dica' }, 'Pagamento simulado: nenhuma cobrança real é feita nesta versão da loja.'),
-        formasPagamento
+        seletorFormaPagamento(pagamentoAnterior)
       )
     ),
-    el('aside', { class: 'resumo', 'aria-label': 'Revisão do pedido' },
-      el('h2', {}, 'Revise seu pedido'),
-      el('dl', {},
-        itens.flatMap((item) => [
-          el('dt', {}, `${item.quantidade}× ${item.produtos.nome}`),
-          el('dd', {}, formatarPreco(calcularSubtotal(item.produtos.preco, item.quantidade))),
-        ]),
-        el('dt', { class: 'total' }, 'Total'),
-        el('dd', { class: 'total' }, formatarPreco(total))
-      ),
-      botaoConfirmar,
-      el('button', { class: 'botao-texto', type: 'button', onclick: () => mostrarCarrinho() }, '← Voltar ao carrinho'),
-      seloCompraSegura()
-    )
+    revisaoDoPedido(botaoConfirmar)
   );
 
-  form.addEventListener('submit', async (evento) => {
+  form.addEventListener('submit', (evento) => {
     evento.preventDefault();
-    if (!endereco.validar(true)) return;
-
-    botaoConfirmar.disabled = true;
-    botaoConfirmar.textContent = 'Processando…';
-    try {
-      const resultado = await finalizarPedido(enderecoCompleto(endereco.valores()), form.pagamento.value);
-
-      if (resultado.ok) {
-        mostrarConfirmacao(resultado.pedido_id);
-        return;
-      }
-      // RN04: o banco ajustou o carrinho e não criou o pedido -> o cliente revê e confirma
-      itens = await listarItens();
-      if (itens.length === 0) {
-        mostrarCarrinho();
-        avisar('Os itens do seu carrinho esgotaram.', 'alerta');
-        return;
-      }
-      mostrarCheckout(resultado.avisos, endereco.valores(), form.pagamento.value);
-    } catch (erro) {
-      tratarErro(erro); // FE02: falha de conexão -> nada é criado
-      botaoConfirmar.disabled = false;
-      botaoConfirmar.textContent = 'Confirmar pedido e pagar';
-    }
+    if (endereco.validar(true)) confirmarPedido(form, endereco, botaoConfirmar);
   });
 
-  trocarConteudo(conteudo,
-    el('h1', { class: 'titulo-pagina' }, 'Finalizar ', el('span', { class: 'grifo' }, 'compra')),
-    form
-  );
+  trocarConteudo(conteudo, el('h1', { class: 'titulo-pagina' }, 'Finalizar compra'), form);
   conteudo.focus();
+}
+
+// Sem o perfil, o cliente só digita o endereço
+async function perfilOuVazio() {
+  try {
+    return (await obterPerfil()) ?? {};
+  } catch {
+    return {};
+  }
+}
+
+function seletorFormaPagamento(escolhida) {
+  return el('fieldset', { class: 'formas-pagamento' },
+    el('legend', { class: 'legenda' }, 'Forma de pagamento'),
+    Object.entries(FORMAS_PAGAMENTO).map(([valor, nome]) =>
+      el('label', { class: 'forma' },
+        el('input', { type: 'radio', name: 'pagamento', value: valor, checked: valor === escolhida }),
+        nome
+      )
+    )
+  );
+}
+
+function revisaoDoPedido(botaoConfirmar) {
+  return el('aside', { class: 'resumo', 'aria-label': 'Revisão do pedido' },
+    el('h2', {}, 'Revise seu pedido'),
+    el('dl', {},
+      itens.flatMap((item) => [
+        el('dt', {}, `${item.quantidade}× ${item.produtos.nome}`),
+        el('dd', {}, formatarPreco(calcularSubtotal(item.produtos.preco, item.quantidade))),
+      ]),
+      el('dt', { class: 'total' }, 'Total'),
+      el('dd', { class: 'total' }, formatarPreco(calcularTotal(itens.map(paraCalculo))))
+    ),
+    botaoConfirmar,
+    el('button', { class: 'botao-texto', type: 'button', onclick: () => mostrarCarrinho() }, '← Voltar ao carrinho'),
+    seloCompraSegura()
+  );
+}
+
+async function confirmarPedido(form, endereco, botao) {
+  botao.disabled = true;
+  botao.textContent = 'Processando…';
+  try {
+    const resultado = await finalizarPedido(enderecoCompleto(endereco.valores()), form.pagamento.value);
+    if (resultado.ok) {
+      mostrarConfirmacao(resultado.pedido_id);
+      return;
+    }
+    // RN04: o banco ajustou o carrinho e não criou o pedido -> o cliente revê e confirma
+    itens = await listarItens();
+    if (itens.length === 0) {
+      mostrarCarrinho();
+      avisar('Os itens do seu carrinho esgotaram.', 'alerta');
+      return;
+    }
+    mostrarCheckout(resultado.avisos, endereco.valores(), form.pagamento.value);
+  } catch (erro) {
+    tratarErro(erro); // FE02: falha de conexão -> nada é criado
+    botao.disabled = false;
+    botao.textContent = 'Confirmar pedido e pagar';
+  }
 }
 
 // RN04: lista do que mudou no carrinho, mostrada antes de confirmar
@@ -286,8 +287,8 @@ function mostrarConfirmacao(pedidoId) {
   itens = [];
   trocarConteudo(conteudo,
     el('section', { class: 'confirmacao', role: 'status' },
-      icone('ok'),
-      el('h1', { class: 'titulo-pagina' }, 'Pedido ', el('span', { class: 'grifo' }, `nº ${pedidoId}`), ' confirmado!'),
+      ilustracao('pedido-confirmado', 'ilustracao-estado'),
+      el('h1', { class: 'titulo-pagina' }, `Pedido nº ${pedidoId} confirmado`),
       el('p', {}, 'Pagamento simulado aprovado. Você pode acompanhar a situação do pedido em "Meus pedidos".'),
       el('div', { class: 'acoes' },
         el('a', { class: 'botao botao-primario', href: '/pedidos.html' }, 'Ver meus pedidos'),

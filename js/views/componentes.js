@@ -3,7 +3,7 @@
 import { el, trocarConteudo } from '../utils/html.js';
 import { formatarPreco, formatarNota } from '../utils/formatacao.js';
 import { urlImagem } from '../services/produtos.js';
-import { NOMES_STATUS } from '../services/pedidos.js';
+import { NOMES_STATUS } from '../utils/constantes.js';
 
 // ---------- ícones ----------
 // Desenhos fixos escritos no próprio código (nunca vêm do usuário),
@@ -79,9 +79,15 @@ export function estrelas(nota) {
   return elemento;
 }
 
+// ---------- ilustrações (estados vazios, confirmação, login) ----------
+// Desenhos decorativos: o texto ao lado já diz o que a tela mostra, por isso alt="".
+export function ilustracao(nome, classe = 'ilustracao') {
+  return el('img', { class: classe, src: `/img/ilustracoes/${nome}.webp`, alt: '', width: 800, height: 800, loading: 'lazy' });
+}
+
 // ---------- cartão de produto da vitrine ----------
-export function cartaoProduto(produto, ordem = 0) {
-  const cartao = el('a', { class: 'cartao-produto surgir', href: `/produto.html?id=${Number(produto.id)}` },
+export function cartaoProduto(produto) {
+  return el('li', {}, el('a', { class: 'cartao-produto', href: `/produto.html?id=${Number(produto.id)}` },
     imagemProduto(produto),
     el('div', { class: 'cartao-corpo' },
       el('span', { class: 'cartao-categoria' }, produto.categorias?.nome ?? ''),
@@ -92,15 +98,13 @@ export function cartaoProduto(produto, ordem = 0) {
       produto.estoque === 0 ? el('span', { class: 'cartao-esgotado' }, 'Indisponível') : null,
       el('span', { class: 'cartao-preco' }, formatarPreco(produto.preco))
     )
-  );
-  cartao.style.setProperty('--ordem', String(Math.min(ordem, 12)));
-  return el('li', {}, cartao);
+  ));
 }
 
 // ---------- selo de compra segura (RNF04) ----------
 export function seloCompraSegura() {
   return el('div', { class: 'selo-seguro' },
-    icone('cadeado'),
+    el('img', { src: '/img/icones/compra-segura.webp', alt: '', width: 512, height: 512, loading: 'lazy' }),
     el('span', {},
       el('strong', {}, 'Compra segura'),
       el('small', {}, 'Conexão HTTPS e dados protegidos (LGPD)')
@@ -133,10 +137,11 @@ export function mostrarErro(container, mensagem, aoTentarDeNovo) {
   );
 }
 
-export function mostrarVazio(container, { titulo, texto, nomeIcone = 'sacola', extras = [] }) {
+// Tela vazia: com ilustracao (nome do arquivo em img/ilustracoes/) ou com um ícone
+export function mostrarVazio(container, { titulo, texto, ilustracao: nomeIlustracao, nomeIcone = 'sacola', extras = [] }) {
   trocarConteudo(container,
     el('div', { class: 'estado' },
-      icone(nomeIcone),
+      nomeIlustracao ? ilustracao(nomeIlustracao, 'ilustracao-estado') : icone(nomeIcone),
       el('h2', {}, titulo),
       texto ? el('p', {}, texto) : null,
       ...extras

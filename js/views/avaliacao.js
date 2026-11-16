@@ -3,7 +3,7 @@
 import { mensagemDeErro } from '../services/supabase.js';
 import { el, trocarConteudo } from '../utils/html.js';
 import { validarComentario, validarNota } from '../utils/validacao.js';
-import { icone, marcarErro, limparErro, abrirJanela } from './componentes.js';
+import { icone, ilustracao, marcarErro, limparErro, abrirJanela } from './componentes.js';
 
 const NOMES_NOTA = ['', 'Péssimo', 'Ruim', 'Regular', 'Bom', 'Excelente'];
 
@@ -98,7 +98,7 @@ export function abrirJanelaAvaliacao({ titulo, nomeProduto, nota = 0, comentario
   function mostrarAgradecimento() {
     trocarConteudo(conteudo,
       el('div', { class: 'agradecimento', role: 'status' },
-        icone('ok'),
+        ilustracao('avaliacao-obrigado', 'ilustracao-agradecimento'),
         el('h2', { id: 'titulo-janela' }, editando ? 'Avaliação atualizada!' : 'Obrigado pela avaliação!'),
         el('p', {}, 'A avaliação já aparece na página do produto e ajuda outros clientes a escolher.')
       ),

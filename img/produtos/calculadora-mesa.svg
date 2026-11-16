@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Calculadora de mesa">
-<rect width="400" height="400" fill="#e7eef6"/>
-<g stroke="#2b2d42" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
-<rect x="115" y="75" width="170" height="250" rx="20" fill="#6c757d"/>
-<rect x="138" y="98" width="124" height="52" rx="6" fill="#cde8d4"/>
-<rect x="138" y="170" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="182" y="170" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="226" y="170" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="138" y="208" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="182" y="208" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="226" y="208" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="138" y="246" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="182" y="246" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="226" y="246" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="138" y="284" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="182" y="284" width="32" height="26" rx="5" fill="#e9ecef"/><rect x="226" y="284" width="32" height="26" rx="5" fill="#f4a261"/>
-</g>
-</svg>

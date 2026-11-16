@@ -10,7 +10,7 @@ import { icone, logotipo, mostrarVazio } from '../componentes.js';
 import { exigirLogin, obterPerfil, sair } from '../../services/auth.js';
 
 const PAGINAS = [
-  { arquivo: 'index.html', nome: 'Resumo', icone: 'grafico' },
+  { arquivo: 'index.html', nome: 'Dashboard', icone: 'grafico' },
   { arquivo: 'produtos.html', nome: 'Produtos', icone: 'caixa' },
   { arquivo: 'categorias.html', nome: 'Categorias', icone: 'menu' },
   { arquivo: 'pedidos.html', nome: 'Pedidos', icone: 'sacola' },
@@ -19,7 +19,6 @@ const PAGINAS = [
 
 // Devolve o perfil do admin ou null (quando não pode entrar)
 export async function montarPainel(paginaAtual) {
-  const cabecalho = document.getElementById('cabecalho');
   const conteudo = document.getElementById('conteudo');
 
   const sessao = await exigirLogin();
@@ -33,31 +32,10 @@ export async function montarPainel(paginaAtual) {
     return null;
   }
 
-  trocarConteudo(cabecalho,
-    el('div', { class: 'admin-topo' },
-      el('div', { class: 'container' },
-        el('div', {}, logotipo(), el('div', { class: 'etiqueta' }, 'Painel do administrador')),
-        el('div', { class: 'acoes-topo' },
-          el('a', { class: 'link-claro', href: '/index.html' }, 'Ver a loja'),
-          el('button', {
-            class: 'link-claro', type: 'button',
-            onclick: async () => { await sair(); location.href = '/index.html'; },
-          }, 'Sair')
-        )
-      )
-    ),
-    perfil?.papel === 'admin'
-      ? el('nav', { class: 'admin-nav', 'aria-label': 'Seções do painel' },
-          el('ul', { class: 'container' },
-            PAGINAS.map((p) => el('li', {},
-              el('a', { href: `/admin/${p.arquivo}`, 'aria-current': p.arquivo === paginaAtual ? 'page' : null },
-                icone(p.icone), p.nome)))
-          )
-        )
-      : null
-  );
+  const ehAdmin = perfil?.papel === 'admin';
+  trocarConteudo(document.getElementById('cabecalho'), topoDoPainel(), ehAdmin ? menuDoPainel(paginaAtual) : null);
 
-  if (perfil?.papel !== 'admin') {
+  if (!ehAdmin) {
     mostrarVazio(conteudo, {
       titulo: 'Acesso restrito',
       texto: 'Esta área é só para o administrador da loja.',
@@ -67,4 +45,29 @@ export async function montarPainel(paginaAtual) {
     return null;
   }
   return perfil;
+}
+
+function topoDoPainel() {
+  return el('div', { class: 'admin-topo' },
+    el('div', { class: 'container' },
+      el('div', {}, logotipo(), el('div', { class: 'etiqueta' }, 'Painel do administrador')),
+      el('div', { class: 'acoes-topo' },
+        el('a', { class: 'link-claro', href: '/index.html' }, 'Ver a loja'),
+        el('button', {
+          class: 'link-claro', type: 'button',
+          onclick: async () => { await sair(); location.href = '/index.html'; },
+        }, 'Sair')
+      )
+    )
+  );
+}
+
+function menuDoPainel(paginaAtual) {
+  return el('nav', { class: 'admin-nav', 'aria-label': 'Seções do painel' },
+    el('ul', { class: 'container' },
+      PAGINAS.map((p) => el('li', {},
+        el('a', { href: `/admin/${p.arquivo}`, 'aria-current': p.arquivo === paginaAtual ? 'page' : null },
+          icone(p.icone), p.nome)))
+    )
+  );
 }

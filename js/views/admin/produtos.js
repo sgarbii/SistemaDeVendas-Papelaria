@@ -2,6 +2,7 @@
 import { mensagemDeErro } from '../../services/supabase.js';
 import { el, trocarConteudo } from '../../utils/html.js';
 import { formatarPreco } from '../../utils/formatacao.js';
+import { validarProduto } from '../../utils/validacao.js';
 import {
   icone, imagemProduto, mostrarCarregando, mostrarErro, marcarErro, limparErro, avisar, abrirJanela,
 } from '../componentes.js';
@@ -38,7 +39,7 @@ async function carregar() {
 function mostrarLista() {
   trocarConteudo(conteudo,
     el('div', { class: 'barra-titulo' },
-      el('h1', { class: 'titulo-pagina' }, el('span', { class: 'grifo' }, 'Produtos')),
+      el('h1', { class: 'titulo-pagina' }, 'Produtos'),
       el('button', { class: 'botao botao-primario', type: 'button', onclick: () => abrirFormulario(null) }, '+ Novo produto')
     ),
     el('table', { class: 'tabela' },
@@ -100,37 +101,12 @@ function campoTexto(id, rotulo, valor, atributos = {}) {
 
 function abrirFormulario(produto) {
   const novo = !produto;
-  const campoArquivo = el('input', {
-    id: 'imagem', name: 'imagem', type: 'file', accept: Object.keys(TIPOS_IMAGEM).join(','),
-  });
-  const previa = imagemProduto(produto ?? {}, { class: 'previa-imagem', alt: 'Prévia da imagem' });
-  campoArquivo.addEventListener('change', () => {
-    const arquivo = campoArquivo.files[0];
-    limparErro(campoArquivo);
-    if (!arquivo) return;
-    // SVG e HTML são recusados: podem carregar script (o Storage também recusa)
-    if (!TIPOS_IMAGEM[arquivo.type]) {
-      marcarErro(campoArquivo, 'Envie uma imagem PNG, JPG ou WEBP.');
-      campoArquivo.value = '';
-      return;
-    }
-    if (arquivo.size > TAMANHO_MAXIMO_IMAGEM) {
-      marcarErro(campoArquivo, 'A imagem pode ter no máximo 2 MB.');
-      campoArquivo.value = '';
-      return;
-    }
-    // prévia como "data:" (a CSP do site não permite imagens "blob:")
-    const leitor = new FileReader();
-    leitor.addEventListener('load', () => { previa.src = leitor.result; });
-    leitor.readAsDataURL(arquivo);
-  });
-
+  const imagem = campoImagem(produto);
   const seletorCategoria = el('select', { id: 'categoria', name: 'categoria' },
     el('option', { value: '' }, 'Escolha…'),
     categorias.map((c) => el('option', { value: c.id, selected: c.id === produto?.categoria_id }, c.nome))
   );
   seletorCategoria.addEventListener('change', () => limparErro(seletorCategoria));
-
   const caixaAtivo = el('input', { id: 'ativo', name: 'ativo', type: 'checkbox', checked: novo || produto.ativo });
   const mensagem = el('div', { 'aria-live': 'polite' });
   const botaoSalvar = el('button', { class: 'botao botao-primario', type: 'submit' }, 'Salvar');
@@ -143,11 +119,7 @@ function abrirFormulario(produto) {
       campoTexto('estoque', 'Estoque disponível', produto?.estoque ?? 0, { type: 'number', min: '0', step: '1', inputmode: 'numeric' })
     ),
     el('div', { class: 'campo' }, el('label', { for: 'categoria' }, 'Categoria'), seletorCategoria),
-    el('div', { class: 'campo' },
-      el('label', { for: 'imagem' }, 'Imagem'),
-      el('div', { class: 'linha-imagem' }, previa, campoArquivo),
-      el('span', { class: 'dica' }, 'PNG, JPG ou WEBP de até 2 MB. Deixe em branco para manter a atual.')
-    ),
+    imagem.elemento,
     el('label', { class: 'caixa-marcar', for: 'ativo' }, caixaAtivo, el('span', {}, 'À venda na loja')),
     mensagem,
     el('div', { class: 'janela-acoes' },
@@ -156,46 +128,17 @@ function abrirFormulario(produto) {
     )
   );
 
-  const janela = el('dialog', { class: 'janela', 'aria-labelledby': 'titulo-produto' },
-    el('div', { class: 'janela-conteudo' },
-      el('div', { class: 'janela-topo' },
-        el('h2', { id: 'titulo-produto' }, novo ? 'Novo produto' : 'Editar produto'),
-        el('button', { class: 'botao-icone', type: 'button', 'aria-label': 'Fechar', onclick: () => fechar() }, icone('fechar'))
-      ),
-      form
-    )
-  );
-
   form.addEventListener('submit', async (evento) => {
     evento.preventDefault();
-    const nome = form.nome.value.trim();
-    const preco = Number(form.preco.value);
-    const estoque = Number(form.estoque.value);
-    const categoriaId = Number(seletorCategoria.value);
-
-    let valido = true;
-    if (!nome) { marcarErro(form.nome, 'Informe o nome.'); valido = false; }
-    if (!(preco > 0)) { marcarErro(form.preco, 'O preço precisa ser maior que zero.'); valido = false; }
-    if (!Number.isInteger(estoque) || estoque < 0) { marcarErro(form.estoque, 'Informe um número inteiro, zero ou maior.'); valido = false; }
-    if (!categoriaId) { marcarErro(seletorCategoria, 'Escolha a categoria.'); valido = false; }
-    if (!valido) return;
+    const dados = lerFormulario(form, seletorCategoria, caixaAtivo);
+    if (!conferirFormulario(form, seletorCategoria, dados)) return;
 
     botaoSalvar.disabled = true;
     botaoSalvar.textContent = 'Salvando…';
     try {
-      let imagemUrl = produto?.imagem_url ?? null;
-      if (campoArquivo.files[0]) imagemUrl = await enviarImagem(campoArquivo.files[0]);
-
-      await salvarProduto({
-        id: produto?.id,
-        nome,
-        descricao: form.descricao.value.trim(),
-        preco,
-        estoque,
-        categoria_id: categoriaId,
-        imagem_url: imagemUrl,
-        ativo: caixaAtivo.checked,
-      });
+      const arquivo = imagem.arquivo();
+      const imagemUrl = arquivo ? await enviarImagem(arquivo) : produto?.imagem_url ?? null;
+      await salvarProduto({ ...dados, id: produto?.id, imagem_url: imagemUrl });
       fechar();
       avisar(novo ? 'Produto cadastrado!' : 'Produto atualizado!');
       carregar();
@@ -206,5 +149,70 @@ function abrirFormulario(produto) {
     }
   });
 
-  const fechar = abrirJanela(janela);
+  const fechar = abrirJanela(el('dialog', { class: 'janela', 'aria-labelledby': 'titulo-produto' },
+    el('div', { class: 'janela-conteudo' },
+      el('div', { class: 'janela-topo' },
+        el('h2', { id: 'titulo-produto' }, novo ? 'Novo produto' : 'Editar produto'),
+        el('button', { class: 'botao-icone', type: 'button', 'aria-label': 'Fechar', onclick: () => fechar() }, icone('fechar'))
+      ),
+      form
+    )
+  ));
+}
+
+function lerFormulario(form, seletorCategoria, caixaAtivo) {
+  return {
+    nome: form.nome.value.trim(),
+    descricao: form.descricao.value.trim(),
+    preco: Number(form.preco.value),
+    estoque: Number(form.estoque.value),
+    categoria_id: Number(seletorCategoria.value),
+    ativo: caixaAtivo.checked,
+  };
+}
+
+// Marca os campos inválidos (RNF08) e diz se pode enviar
+function conferirFormulario(form, seletorCategoria, dados) {
+  const erros = validarProduto({ ...dados, categoriaId: dados.categoria_id });
+  const campos = { nome: form.nome, preco: form.preco, estoque: form.estoque, categoria: seletorCategoria };
+  for (const [campo, mensagem] of Object.entries(erros)) marcarErro(campos[campo], mensagem);
+  return Object.keys(erros).length === 0;
+}
+
+// Campo de imagem com prévia. arquivo() devolve o arquivo escolhido ou null.
+function campoImagem(produto) {
+  const entrada = el('input', { id: 'imagem', name: 'imagem', type: 'file', accept: Object.keys(TIPOS_IMAGEM).join(',') });
+  const previa = imagemProduto(produto ?? {}, { class: 'previa-imagem', alt: 'Prévia da imagem' });
+
+  entrada.addEventListener('change', () => {
+    limparErro(entrada);
+    const arquivo = entrada.files[0];
+    if (!arquivo) return;
+    const problema = problemaDaImagem(arquivo);
+    if (problema) {
+      marcarErro(entrada, problema);
+      entrada.value = '';
+      return;
+    }
+    // prévia como "data:" (a CSP do site não permite imagens "blob:")
+    const leitor = new FileReader();
+    leitor.addEventListener('load', () => { previa.src = leitor.result; });
+    leitor.readAsDataURL(arquivo);
+  });
+
+  return {
+    elemento: el('div', { class: 'campo' },
+      el('label', { for: 'imagem' }, 'Imagem'),
+      el('div', { class: 'linha-imagem' }, previa, entrada),
+      el('span', { class: 'dica' }, 'PNG, JPG ou WEBP de até 2 MB. Deixe em branco para manter a atual.')
+    ),
+    arquivo: () => entrada.files[0] ?? null,
+  };
+}
+
+// SVG e HTML são recusados: podem carregar script (o Storage também recusa)
+function problemaDaImagem(arquivo) {
+  if (!TIPOS_IMAGEM[arquivo.type]) return 'Envie uma imagem PNG, JPG ou WEBP.';
+  if (arquivo.size > TAMANHO_MAXIMO_IMAGEM) return 'A imagem pode ter no máximo 2 MB.';
+  return null;
 }

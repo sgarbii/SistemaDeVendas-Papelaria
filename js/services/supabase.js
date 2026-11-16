@@ -22,6 +22,24 @@ export class ErroDoSistema extends Error {
 }
 
 const MENSAGEM_GENERICA = 'Algo deu errado. Tente de novo em instantes.';
+const MENSAGEM_VALOR_INVALIDO = 'Algum valor informado não é válido. Confira os campos.';
+
+const ERRO_DE_REDE = /failed to fetch|networkerror|load failed|fetch failed|network request failed/i;
+const CODIGOS_SEM_SESSAO = ['28000', 'PGRST301', 'PGRST303'];
+const ERRO_DE_TOKEN = /jwt expired|invalid jwt/i;
+
+// Mensagem para cada código do Postgres. Recebe o texto original do banco
+// para os casos em que ele foi escrito por nós (raise exception).
+const MENSAGENS_POR_CODIGO = {
+  P0001: (mensagem) => mensagem || MENSAGEM_GENERICA, // ex.: "Produto indisponível."
+  // RLS ou GRANT recusou: a única mensagem 42501 nossa é a do trigger de avaliações
+  42501: (mensagem) => (mensagem.startsWith('Só é possível avaliar') ? mensagem : 'Você não tem permissão para fazer isso.'),
+  23505: () => 'Este registro já existe.',
+  23503: () => 'Não é possível excluir: existem outros registros ligados a este.',
+  23514: () => MENSAGEM_VALOR_INVALIDO,
+  22001: () => MENSAGEM_VALOR_INVALIDO,
+  '22P02': () => MENSAGEM_VALOR_INVALIDO,
+};
 
 // Traduz os erros do Supabase/Postgres para mensagens em português.
 // Regra: o texto bruto do banco NUNCA aparece para o usuário (pode revelar
@@ -34,33 +52,14 @@ export function traduzirErro(erro) {
   if (!configurado) {
     return new ErroDoSistema('O site ainda não foi configurado: preencha js/config.js com os dados do Supabase.');
   }
-  // FE02: falha de conexão
-  if (/failed to fetch|networkerror|load failed|fetch failed|network request failed/i.test(mensagem)) {
+  if (ERRO_DE_REDE.test(mensagem)) { // FE02
     return new ErroDoSistema('Não foi possível conectar. Verifique sua internet e tente de novo.', { codigo: 'rede' });
   }
-  // sessão ausente ou vencida (RNF02, RNF13)
-  if (codigo === '28000' || codigo === 'PGRST301' || codigo === 'PGRST303' || /jwt expired|invalid jwt/i.test(mensagem)) {
+  if (CODIGOS_SEM_SESSAO.includes(codigo) || ERRO_DE_TOKEN.test(mensagem)) { // RNF02, RNF13
     return new ErroDoSistema('Sua sessão expirou. Faça login para continuar.', { codigo, semSessao: true });
   }
-  switch (codigo) {
-    case 'P0001': // mensagens das nossas funções (ex.: "Produto indisponível.")
-      return new ErroDoSistema(mensagem || MENSAGEM_GENERICA, { codigo });
-    case '42501': // RLS ou GRANT recusou
-      // a única mensagem 42501 escrita por nós é a do trigger de avaliações
-      return new ErroDoSistema(
-        mensagem.startsWith('Só é possível avaliar') ? mensagem : 'Você não tem permissão para fazer isso.',
-        { codigo });
-    case '23505':
-      return new ErroDoSistema('Este registro já existe.', { codigo });
-    case '23503':
-      return new ErroDoSistema('Não é possível excluir: existem outros registros ligados a este.', { codigo });
-    case '23514':
-    case '22001':
-    case '22P02':
-      return new ErroDoSistema('Algum valor informado não é válido. Confira os campos.', { codigo });
-    default:
-      return new ErroDoSistema(MENSAGEM_GENERICA, { codigo });
-  }
+  const traduzir = MENSAGENS_POR_CODIGO[codigo] ?? (() => MENSAGEM_GENERICA);
+  return new ErroDoSistema(traduzir(mensagem), { codigo });
 }
 
 // Texto que as telas mostram para qualquer erro: só as nossas mensagens

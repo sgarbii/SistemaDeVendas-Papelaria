@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   validarEmail, validarSenha, validarComentario, validarNota, validarCep,
-  validarTelefone, termoDeBuscaValido, destinoSeguro, imagemPermitida, SENHA_MINIMA,
+  validarTelefone, termoDeBuscaValido, destinoSeguro, imagemPermitida, validarProduto, SENHA_MINIMA,
 } from '../js/utils/validacao.js';
 
 describe('validarEmail', () => {
@@ -89,8 +89,13 @@ describe('imagemPermitida (imagem_url)', () => {
   const projeto = 'https://abcdefghij.supabase.co';
   const storage = `${projeto}/storage/v1/object/public/produtos/`;
 
-  it('aceita as imagens do seed, que ficam no site', () => {
-    expect(imagemPermitida('/img/produtos/caneta-azul.svg', projeto)).toBe(true);
+  it('aceita as fotos WEBP do seed, que ficam no site', () => {
+    expect(imagemPermitida('/img/produtos/caneta-azul.webp', projeto)).toBe(true);
+  });
+
+  it('recusa os antigos SVGs do seed e outras extensões locais', () => {
+    expect(imagemPermitida('/img/produtos/caneta-azul.svg', projeto)).toBe(false);
+    expect(imagemPermitida('/img/produtos/caneta-azul.webpx', projeto)).toBe(false);
   });
 
   it('aceita arquivo do Storage do próprio projeto com nome UUID', () => {
@@ -107,7 +112,7 @@ describe('imagemPermitida (imagem_url)', () => {
   it('recusa SVG ou HTML no Storage e caminhos com ../', () => {
     expect(imagemPermitida(`${storage}abc.svg`, projeto)).toBe(false);
     expect(imagemPermitida(`${storage}abc.html`, projeto)).toBe(false);
-    expect(imagemPermitida('/img/produtos/../../admin/x.svg', projeto)).toBe(false);
+    expect(imagemPermitida('/img/produtos/../../admin/x.webp', projeto)).toBe(false);
   });
 
   it('vazio usa a imagem padrão', () => {
@@ -127,5 +132,31 @@ describe('destinoSeguro (volta depois do login, FA01)', () => {
     expect(destinoSeguro('//site-falso.com/login.html')).toBe('/index.html');
     expect(destinoSeguro('javascript:alert(1)')).toBe('/index.html');
     expect(destinoSeguro(null)).toBe('/index.html');
+  });
+});
+
+describe('validarProduto (painel do administrador)', () => {
+  const valido = { nome: 'Caneta', preco: 19.9, estoque: 10, categoriaId: 1 };
+
+  it('produto completo não tem erros', () => {
+    expect(validarProduto(valido)).toEqual({});
+  });
+
+  it('aceita estoque zero (produto esgotado)', () => {
+    expect(validarProduto({ ...valido, estoque: 0 })).toEqual({});
+  });
+
+  it('aponta cada campo inválido', () => {
+    expect(validarProduto({ nome: '   ', preco: 0, estoque: 1.5, categoriaId: 0 })).toEqual({
+      nome: 'Informe o nome.',
+      preco: 'O preço precisa ser maior que zero.',
+      estoque: 'Informe um número inteiro, zero ou maior.',
+      categoria: 'Escolha a categoria.',
+    });
+  });
+
+  it('recusa preço e estoque negativos ou que não são números', () => {
+    const erros = validarProduto({ ...valido, preco: Number.NaN, estoque: -1 });
+    expect(Object.keys(erros)).toEqual(['preco', 'estoque']);
   });
 });

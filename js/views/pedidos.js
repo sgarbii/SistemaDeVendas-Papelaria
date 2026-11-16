@@ -10,8 +10,9 @@ import {
 import { abrirJanelaAvaliacao } from './avaliacao.js';
 import { exigirLogin, irParaLogin } from '../services/auth.js';
 import {
-  listarMeusPedidos, avaliacaoDoItem, FORMAS_PAGAMENTO, STATUS_AVALIAVEIS,
+  listarMeusPedidos, avaliacaoDoItem,
 } from '../services/pedidos.js';
+import { FORMAS_PAGAMENTO, pedidoPago } from '../utils/constantes.js';
 import { publicarAvaliacao, editarAvaliacao } from '../services/avaliacoes.js';
 
 const conteudo = document.getElementById('conteudo');
@@ -38,20 +39,21 @@ function mostrarPedidos(pedidos) {
     mostrarVazio(conteudo, {
       titulo: 'Você ainda não fez pedidos',
       texto: 'Quando comprar, seus pedidos aparecem aqui para você acompanhar.',
+      ilustracao: 'sem-pedidos',
       extras: [el('a', { class: 'botao botao-primario', href: '/index.html' }, 'Ir às compras')],
     });
     return;
   }
 
   trocarConteudo(conteudo,
-    el('h1', { class: 'titulo-pagina' }, 'Meus ', el('span', { class: 'grifo' }, 'pedidos')),
+    el('h1', { class: 'titulo-pagina' }, 'Meus pedidos'),
     el('p', { class: 'subtitulo' }, 'Acompanhe a situação de cada pedido e avalie o que você comprou.'),
     el('ul', { class: 'lista-pedidos' }, pedidos.map(cartaoPedido))
   );
 }
 
 function cartaoPedido(pedido) {
-  const avaliavel = STATUS_AVALIAVEIS.includes(pedido.status);
+  const avaliavel = pedidoPago(pedido); // RNF07: só itens de pedidos pagos
   return el('li', { class: 'pedido' },
     el('div', { class: 'pedido-topo' },
       el('div', {},

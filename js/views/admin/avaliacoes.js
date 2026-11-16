@@ -23,7 +23,7 @@ async function carregar() {
 }
 
 function mostrarLista(avaliacoes) {
-  const titulo = el('div', { class: 'barra-titulo' }, el('h1', { class: 'titulo-pagina' }, el('span', { class: 'grifo' }, 'Avaliações')));
+  const titulo = el('div', { class: 'barra-titulo' }, el('h1', { class: 'titulo-pagina' }, 'Avaliações'));
   if (avaliacoes.length === 0) {
     const area = el('div');
     mostrarVazio(area, { titulo: 'Nenhuma avaliação ainda', nomeIcone: 'estrela', texto: 'As avaliações dos clientes aparecem aqui.' });
