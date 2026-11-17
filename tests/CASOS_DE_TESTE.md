@@ -276,7 +276,7 @@ await supabase.from('pedidos').select('*');          // só pedidos do B
 
 **Esperado:** nenhum registro do Cliente A é retornado.
 
-**Resultado obtido:** ☐ Passou ☐ Falhou. Observações: ______________________
+**Resultado obtido:** ☑ Passou ☐ Falhou. Observações: 16/11/2026, no site publicado, logado como cliente comum: a consulta aos pedidos devolveu só os pedidos da própria conta.
 
 ---
 
@@ -305,7 +305,7 @@ Também: abra `/admin/produtos.html` logado como cliente comum.
 **Esperado:** erro de permissão, *new row violates row-level security policy for table "produtos"* (código 42501).
 O painel mostra "Acesso restrito".
 
-**Resultado obtido:** ☐ Passou ☐ Falhou. Observações: ainda não executado. Revisão de código (auditoria de segurança de 16/11/2026): a política "produtos: admin cria" (`06_rls.sql`) só aceita inserção de quem passa em `eh_admin()`.
+**Resultado obtido:** ☑ Passou ☐ Falhou. Observações: 16/11/2026, no site publicado, logado como cliente comum: a inserção foi recusada pelo banco (política RLS "produtos: admin cria", `06_rls.sql`).
 
 ---
 
